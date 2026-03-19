@@ -134,9 +134,13 @@ export class TextObfuscation implements ProtectionModule {
       this.config.onEvent?.({ type: "tamper_detected", timestamp: Date.now() });
     }
 
+    // Disconnect mutation observer during our own updates to prevent
+    // the observer from re-scrambling text we're intentionally unscrambling
+    this.mutationObserver?.disconnect();
     for (const rect of this.rects) {
       this.toggleRect(rect, hacked);
     }
+    this.reconnectMutationObserver();
   }
 
   private toggleRect(rect: ObfuscationRect, hacked: boolean): void {
@@ -282,7 +286,7 @@ export class TextObfuscation implements ProtectionModule {
           return;
         }
 
-        // Someone un-scrambled a tracked text node
+        // Someone un-scrambled a tracked text node externally
         if (mutation.type === "characterData") {
           const rect = this.rects.find((r) => r.node === mutation.target);
           if (rect && rect.isObfuscated) {
@@ -292,7 +296,11 @@ export class TextObfuscation implements ProtectionModule {
       }
     });
 
-    this.mutationObserver.observe(this.config.contentRoot, {
+    this.reconnectMutationObserver();
+  }
+
+  private reconnectMutationObserver(): void {
+    this.mutationObserver?.observe(this.config.contentRoot, {
       childList: true,
       subtree: true,
       characterData: true,
