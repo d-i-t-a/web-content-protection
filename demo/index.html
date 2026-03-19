@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@d-i-t-a/content-protection — Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e1e4e8;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+
+    header h1 span { color: #58a6ff; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      height: calc(100vh - 57px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: #161b22;
+      border-right: 1px solid #30363d;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #8b949e;
+      margin-bottom: 12px;
+    }
+
+    .module-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      margin-bottom: 4px;
+      border-radius: 6px;
+      background: #0d1117;
+      border: 1px solid #21262d;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .module-toggle:hover { border-color: #388bfd; }
+    .module-toggle.active { border-color: #388bfd; background: #0d1117; }
+
+    .module-toggle label {
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .module-toggle .tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .tag-existing { background: #1f6feb33; color: #58a6ff; }
+    .tag-new { background: #23862533; color: #3fb950; }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #30363d;
+      border-radius: 10px;
+      transition: 0.2s;
+    }
+
+    .toggle-slider:before {
+      content: "";
+      position: absolute;
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background: #8b949e;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider { background: #1f6feb; }
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(16px);
+      background: #f0f6fc;
+    }
+
+    /* Content area */
+    .content-area {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toolbar {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 8px 16px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .toolbar button:hover { background: #30363d; border-color: #8b949e; }
+
+    .reader-container {
+      flex: 1;
+      display: flex;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .book-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 60px;
+      background: #fafafa;
+      color: #1a1a1a;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 17px;
+      line-height: 1.8;
+      position: relative;
+    }
+
+    .book-content h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .book-content h3 {
+      font-size: 18px;
+      margin: 28px 0 12px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .book-content p { margin-bottom: 16px; text-indent: 1.5em; }
+    .book-content p:first-of-type { text-indent: 0; }
+
+    .book-content blockquote {
+      margin: 20px 0;
+      padding: 12px 24px;
+      border-left: 3px solid #ccc;
+      font-style: italic;
+      color: #555;
+    }
+
+    /* Annotations panel */
+    .annotations-panel {
+      width: 280px;
+      background: #f5f5f5;
+      border-left: 1px solid #ddd;
+      padding: 16px;
+      overflow-y: auto;
+      color: #333;
+    }
+
+    .annotations-panel h3 {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #111;
+    }
+
+    .annotation-item {
+      background: #fff;
+      border: 1px solid #e1e4e8;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .annotation-item .highlight-text {
+      background: #fff3cd;
+      padding: 2px 4px;
+      border-radius: 2px;
+    }
+
+    .annotation-item .note {
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* Event log */
+    .event-log {
+      background: #0d1117;
+      border-top: 1px solid #30363d;
+      padding: 8px 16px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 11px;
+    }
+
+    .event-log .event-entry {
+      padding: 2px 0;
+      color: #8b949e;
+    }
+
+    .event-log .event-entry .event-type { color: #ffa657; font-weight: 600; }
+    .event-log .event-entry .event-time { color: #484f58; }
+    .event-log .event-entry .event-detail { color: #c9d1d9; }
+
+    .log-empty { color: #484f58; font-style: italic; }
+
+    /* Status indicator */
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #8b949e;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #484f58;
+    }
+
+    .status-dot.active { background: #3fb950; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span>@d-i-t-a/</span>content-protection</h1>
+  <div class="status">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Inactive</span>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="sidebar">
+    <h2>Protection Modules</h2>
+
+    <div class="module-toggle" data-module="dragPrevention">
+      <label><input type="checkbox" checked> Drag Prevention <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="printProtection">
+      <label><input type="checkbox" checked> Print Protection <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="copyProtection">
+      <label><input type="checkbox" checked> Copy Protection <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="contextMenuProtection">
+      <label><input type="checkbox" checked> Context Menu <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="keyboardProtection">
+      <label><input type="checkbox" checked> Keyboard Protection <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="devToolsDetection">
+      <label><input type="checkbox"> DevTools Detection <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="textObfuscation">
+      <label><input type="checkbox" checked> Text Obfuscation <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="screenshotDetection">
+      <label><input type="checkbox"> Screenshot Detection <span class="tag tag-new">NEW</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="watermarking">
+      <label><input type="checkbox"> Watermarking <span class="tag tag-new">NEW</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="selectionLimiting">
+      <label><input type="checkbox"> Selection Limiting <span class="tag tag-new">NEW</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <h2>Copy Mode</h2>
+      <select id="copyMode" style="width: 100%; padding: 8px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; font-size: 13px;">
+        <option value="block">Block All</option>
+        <option value="restrict">Restrict (200 chars)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div class="toolbar">
+      <button id="btnActivate">Activate All</button>
+      <button id="btnDeactivate">Deactivate All</button>
+      <button id="btnClearLog">Clear Log</button>
+      <button id="btnTestCopy">Test: Copy</button>
+      <button id="btnTestPrint">Test: Ctrl+P</button>
+      <button id="btnTestSelect">Test: Select All</button>
+      <button id="btnDumpText">Test: Dump innerText</button>
+    </div>
+
+    <div class="reader-container">
+      <div class="book-content" id="bookContent">
+        <h2>Chapter 1: The Art of the Invisible</h2>
+
+        <p>In the quiet chambers of the digital library, where electrons dance across silicon pathways, there exists a peculiar tension between accessibility and preservation. The modern reader expects instant access to the world's knowledge, yet the creators of that knowledge deserve protection for their craft.</p>
+
+        <p>Consider the humble book. For centuries, its physical form served as its own protection. One could not simply wish a book into existence; it required paper, ink, binding, and the labor of many hands. The digital age swept away these natural barriers, replacing them with nothing but the honor system and a prayer.</p>
+
+        <h3>The Challenge of Digital Content</h3>
+
+        <p>When content exists as mere sequences of characters in memory, distinguishable from any other data only by context, the challenge of protection becomes philosophical as much as technical. How does one protect something that can be perfectly replicated at zero cost?</p>
+
+        <p>The answer, as it turns out, lies not in absolute prevention but in graduated deterrence. Like the locks on your front door, digital content protection need not be impenetrable to be effective. It need only raise the cost of unauthorized access above the threshold that most would-be infringers are willing to bear.</p>
+
+        <blockquote>"The best security is that which makes the effort of circumvention exceed the value of what is being protected." — A principle as old as the first locked door.</blockquote>
+
+        <h3>Layers of Defense</h3>
+
+        <p>Modern content protection employs multiple layers, each addressing a different vector of potential extraction. The casual reader who highlights a passage and attempts to email it to a friend encounters the first layer: clipboard interception. The slightly more determined user who opens developer tools meets the second: text obfuscation, where the DOM itself becomes unreliable.</p>
+
+        <p>Beyond these visible defenses lie invisible ones. Watermarks, both visual and textual, serve not to prevent copying but to ensure accountability. Zero-width Unicode characters, invisible to the human eye but perfectly legible to software, carry the identity of the reader through any text that escapes the system's other protections.</p>
+
+        <p>The viewport-aware scrambling system represents perhaps the most elegant compromise between usability and security. Text that the reader can see is presented in its original, beautiful form. Text that has scrolled beyond the visible area reverts to its scrambled state, ensuring that any bulk extraction of the DOM yields mostly nonsense.</p>
+
+        <h3>The Philosophy of Protection</h3>
+
+        <p>There are those who argue that all digital content should be free, that the very concept of intellectual property is an anachronism. There are others who believe that every unauthorized view is theft. The truth, as usual, lies somewhere between these extremes.</p>
+
+        <p>What we can say with certainty is that creators deserve to be compensated for their work, and that systems which make unauthorized redistribution difficult — even if not impossible — serve to maintain the economic ecosystem that supports creative endeavor.</p>
+
+        <p>This is the purpose of content protection: not to build an impenetrable fortress, but to construct a reasonable boundary that respects both the reader's experience and the creator's rights. The technology exists. The question is simply whether we choose to use it wisely.</p>
+
+        <p>As we proceed through the remaining chapters, we will examine each layer of protection in detail, from the simple event listener that intercepts a copy command to the sophisticated obfuscation engine that renders the DOM itself untrustworthy to those who would misuse it.</p>
+
+        <p>The journey begins, as all journeys do, with a single step — or in our case, a single line of code.</p>
+
+        <p>Let us begin.</p>
+      </div>
+
+      <div class="annotations-panel" id="annotationsPanel">
+        <h3>Highlights &amp; Notes</h3>
+        <div class="annotation-item">
+          <div class="highlight-text">The answer lies not in absolute prevention but in graduated deterrence.</div>
+          <div class="note">Key concept — this is our pitch to publishers</div>
+        </div>
+        <div class="annotation-item">
+          <div class="highlight-text">Zero-width Unicode characters, invisible to the human eye but perfectly legible to software, carry the identity of the reader.</div>
+          <div class="note">Watermarking approach — new in this release</div>
+        </div>
+        <div class="annotation-item">
+          <div class="highlight-text">Text that has scrolled beyond the visible area reverts to its scrambled state.</div>
+        </div>
+        <div class="annotation-item">
+          <div class="highlight-text">Not to build an impenetrable fortress, but to construct a reasonable boundary.</div>
+          <div class="note">Good summary for the README</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="event-log" id="eventLog">
+      <div class="log-empty">Protection events will appear here...</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { ContentProtection, Watermarking } from "../dist/index.js";
+
+  const bookContent = document.getElementById("bookContent");
+  const annotationsPanel = document.getElementById("annotationsPanel");
+  const eventLog = document.getElementById("eventLog");
+  const statusDot = document.getElementById("statusDot");
+  const statusText = document.getElementById("statusText");
+
+  let protection = null;
+  let isActive = false;
+
+  function getEnabledModules() {
+    const modules = {};
+    document.querySelectorAll(".module-toggle").forEach((toggle) => {
+      const checkbox = toggle.querySelector(".toggle-switch input");
+      const name = toggle.dataset.module;
+      if (checkbox.checked) modules[name] = true;
+    });
+    return modules;
+  }
+
+  function logEvent(event) {
+    const empty = eventLog.querySelector(".log-empty");
+    if (empty) empty.remove();
+
+    const time = new Date().toLocaleTimeString();
+    const entry = document.createElement("div");
+    entry.className = "event-entry";
+    entry.innerHTML = `<span class="event-time">${time}</span> <span class="event-type">${event.type}</span>${event.detail ? ` <span class="event-detail">${event.detail}</span>` : ""}`;
+    eventLog.appendChild(entry);
+    eventLog.scrollTop = eventLog.scrollHeight;
+  }
+
+  function buildConfig() {
+    const enabled = getEnabledModules();
+    const copyMode = document.getElementById("copyMode").value;
+    const config = { onEvent: logEvent };
+
+    const targets = {
+      contentElement: bookContent,
+      additionalElements: [annotationsPanel],
+    };
+
+    if (enabled.dragPrevention) {
+      config.dragPrevention = { ...targets };
+    }
+    if (enabled.printProtection) {
+      config.printProtection = { ...targets };
+    }
+    if (enabled.copyProtection) {
+      config.copyProtection = {
+        ...targets,
+        mode: copyMode,
+        maxCharacters: 200,
+        blockedMessage: "[Copy protected by @d-i-t-a/content-protection]",
+      };
+    }
+    if (enabled.contextMenuProtection) {
+      config.contextMenuProtection = { ...targets };
+    }
+    if (enabled.keyboardProtection) {
+      config.keyboardProtection = { ...targets };
+    }
+    if (enabled.devToolsDetection) {
+      config.devToolsDetection = {
+        action: "callback",  // "callback" only for demo — don't redirect
+      };
+    }
+    if (enabled.textObfuscation) {
+      config.textObfuscation = {
+        scrollContainer: bookContent,
+        contentRoot: bookContent,
+        viewportPadding: 30,
+      };
+    }
+    if (enabled.screenshotDetection) {
+      config.screenshotDetection = {
+        protectedElements: [bookContent, annotationsPanel],
+        blankOnBlur: true,
+        blankOnHidden: true,
+        restoreDelay: 300,
+      };
+    }
+    if (enabled.watermarking) {
+      config.watermarking = {
+        contentRoot: bookContent,
+        userId: "demo-user-42",
+        sessionId: "sess-" + Date.now().toString(36),
+        opacity: 0.03,
+        enableTextFingerprint: true,
+      };
+    }
+    if (enabled.selectionLimiting) {
+      config.selectionLimiting = {
+        ...targets,
+        maxSelectionLength: 300,
+        behavior: "collapse",
+      };
+    }
+
+    return config;
+  }
+
+  async function activate() {
+    if (protection) protection.deactivate();
+    const config = buildConfig();
+    protection = new ContentProtection(config);
+    await protection.activate();
+    isActive = true;
+    statusDot.classList.add("active");
+    statusText.textContent = `Active (${Object.keys(config).filter(k => k !== "onEvent").length} modules)`;
+    logEvent({ type: "system", timestamp: Date.now(), detail: "Protection activated" });
+  }
+
+  function deactivate() {
+    if (protection) {
+      protection.deactivate();
+      protection = null;
+    }
+    isActive = false;
+    statusDot.classList.remove("active");
+    statusText.textContent = "Inactive";
+    logEvent({ type: "system", timestamp: Date.now(), detail: "Protection deactivated" });
+  }
+
+  // Toolbar buttons
+  document.getElementById("btnActivate").addEventListener("click", activate);
+  document.getElementById("btnDeactivate").addEventListener("click", deactivate);
+  document.getElementById("btnClearLog").addEventListener("click", () => {
+    eventLog.innerHTML = '<div class="log-empty">Protection events will appear here...</div>';
+  });
+
+  document.getElementById("btnTestCopy").addEventListener("click", () => {
+    document.execCommand("copy");
+  });
+
+  document.getElementById("btnTestPrint").addEventListener("click", () => {
+    window.print();
+  });
+
+  document.getElementById("btnTestSelect").addEventListener("click", () => {
+    const range = document.createRange();
+    range.selectNodeContents(bookContent);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+
+  document.getElementById("btnDumpText").addEventListener("click", () => {
+    const text = bookContent.innerText;
+    const words = text.split(/\s+/).length;
+    const scrambledWords = text.split(/\s+/).filter(w => /^[a-zA-Z]+$/.test(w) && w.length > 3).filter(w => {
+      // Heuristic: check if word exists (very rough)
+      return false; // just count total
+    });
+    logEvent({
+      type: "system",
+      timestamp: Date.now(),
+      detail: `innerText dump: ${text.length} chars, ${words} words. Check console for full text.`,
+    });
+    console.log("--- innerText dump ---");
+    console.log(text.substring(0, 500) + "...");
+    console.log("--- end dump ---");
+  });
+
+  // Toggle switches — sync both checkboxes in each row
+  document.querySelectorAll(".module-toggle").forEach((toggle) => {
+    const labelCheckbox = toggle.querySelector("label input");
+    const switchCheckbox = toggle.querySelector(".toggle-switch input");
+
+    function sync(source) {
+      labelCheckbox.checked = source.checked;
+      switchCheckbox.checked = source.checked;
+      toggle.classList.toggle("active", source.checked);
+      // Re-activate if already active
+      if (isActive) activate();
+    }
+
+    labelCheckbox.addEventListener("change", () => sync(labelCheckbox));
+    switchCheckbox.addEventListener("change", () => sync(switchCheckbox));
+
+    // Click on the row toggles too
+    toggle.addEventListener("click", (e) => {
+      if (e.target.tagName === "INPUT") return;
+      switchCheckbox.checked = !switchCheckbox.checked;
+      sync(switchCheckbox);
+    });
+
+    // Initial state
+    toggle.classList.toggle("active", switchCheckbox.checked);
+  });
+
+  // Copy mode change re-activates
+  document.getElementById("copyMode").addEventListener("change", () => {
+    if (isActive) activate();
+  });
+
+  // Auto-activate on load
+  activate();
+</script>
+
+</body>
+</html>

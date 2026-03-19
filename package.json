@@ -1,0 +1,49 @@
+{
+  "name": "@d-i-t-a/content-protection",
+  "version": "1.0.0",
+  "description": "Client-side content protection for web-based ebook readers. Drag prevention, copy protection, print blocking, text obfuscation, DevTools detection, and more.",
+  "author": "AM Consulting LLC (DITA)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0"
+  },
+  "optionalDependencies": {
+    "devtools-detector": "^2.0.14",
+    "browserslist-useragent-regexp": "^4.1.3"
+  },
+  "keywords": [
+    "drm",
+    "content-protection",
+    "ebook",
+    "reader",
+    "copy-protection",
+    "print-protection",
+    "obfuscation",
+    "web-reader"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d-i-t-a/content-protection"
+  }
+}
