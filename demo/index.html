@@ -392,74 +392,158 @@
 
     <div class="reader-container">
       <div class="book-content" id="bookContent">
-        <h2>@d-i-t-a/web-content-protection</h2>
+        <h2 style="font-size:28px;text-align:center;margin-bottom:4px;">The Warden's Handbook</h2>
+        <p style="text-indent:0;text-align:center;font-style:italic;color:#888;margin-bottom:4px;">A Novel About Content Protection on the Open Web</p>
+        <p style="text-indent:0;text-align:center;font-size:13px;color:#aaa;margin-bottom:24px;">by DITA (AM Consulting LLC) — Powered by <strong>@d-i-t-a/web-content-protection</strong></p>
 
-        <p style="text-indent:0;font-style:italic;color:#555;border-left:3px solid #1f6feb;padding-left:16px;margin-bottom:24px;">A modular, framework-agnostic npm package that provides client-side content protection for web-based ebook readers, digital publishing platforms, and any application serving protected text or media in the browser. Developed by DITA (AM Consulting LLC), the same team behind the R2D2BC reader, this library extracts battle-tested protection techniques into a standalone, tree-shakable package that can be dropped into any web reader — regardless of its underlying architecture.</p>
+        <hr style="border:none;border-top:1px solid #ddd;margin:24px 0;">
 
-        <h3>Why This Exists</h3>
+        <p style="text-indent:0;font-style:italic;color:#555;font-size:15px;border-left:3px solid #1f6feb;padding-left:16px;margin-bottom:32px;">This sample book demonstrates every protection module in real time. The text you are reading is the protected content. Toggle the modules in the sidebar and try to extract it — copy it, print it, drag it, inspect it. Watch what happens.</p>
 
-        <p>Web-based readers face a fundamental challenge: content rendered in the browser is inherently accessible to the user through developer tools, clipboard operations, print functions, drag-and-drop, screen readers, and automation scripts. While no client-side solution can provide absolute DRM, a well-designed system of graduated deterrence can raise the cost of unauthorized extraction above the threshold most users are willing to bear — protecting publishers' content while preserving the legitimate reading experience.</p>
+        <hr style="border:none;border-top:1px solid #ddd;margin:24px 0;">
 
-        <p>This package provides 16 independent protection modules that can be used individually or composed through a single orchestrator. Each addresses a specific extraction vector identified in real-world security audits of commercial ebook platforms.</p>
+        <h3 style="text-align:center;font-size:20px;margin:32px 0 8px;letter-spacing:2px;text-transform:uppercase;color:#888;">Part I</h3>
+        <h2 style="text-align:center;margin-bottom:32px;">The Thief in the Machine</h2>
 
-        <h3>Chapter 1: The Art of the Invisible</h3>
+        <p>The email arrived at 3:47 AM, as the worst ones always do.</p>
 
-        <p>In the quiet chambers of the digital library, where electrons dance across silicon pathways, there exists a peculiar tension between accessibility and preservation. The modern reader expects instant access to the world's knowledge, yet the creators of that knowledge deserve protection for their craft.</p>
+        <p>Elena Vasquez, Chief Technology Officer of Meridian Publishing, stared at the subject line on her phone: <em>"Your entire fall catalog is on a pirate site. All 240 titles."</em> She sat up in bed, heart pounding, and opened the message.</p>
 
-        <p>Consider the humble book. For centuries, its physical form served as its own protection. One could not simply wish a book into existence; it required paper, ink, binding, and the labor of many hands. The digital age swept away these natural barriers, replacing them with nothing but the honor system and a prayer.</p>
+        <p>It was true. Every single book Meridian had published in the last quarter — from the prize-winning literary fiction to the modest self-help guides — had been stripped of protection and uploaded in pristine EPUB format. The pirate site's download counter showed numbers that made her stomach turn.</p>
 
-        <h3>The Challenge of Digital Content</h3>
+        <p>She called Marcus first. Marcus Chen, her head of engineering, had warned her this would happen.</p>
 
-        <p>When content exists as mere sequences of characters in memory, distinguishable from any other data only by context, the challenge of protection becomes philosophical as much as technical. How does one protect something that can be perfectly replicated at zero cost?</p>
+        <p>"The web reader," he said, not even sounding surprised. "I told the board. You put a book in a browser, and the browser is the user's machine. It's their DOM. Their JavaScript console. Their clipboard."</p>
 
-        <p>The answer, as it turns out, lies not in absolute prevention but in graduated deterrence. Like the locks on your front door, digital content protection need not be impenetrable to be effective. It need only raise the cost of unauthorized access above the threshold that most would-be infringers are willing to bear.</p>
+        <p>"So what do we do?" Elena asked. "Go back to dedicated apps? Our readers will revolt."</p>
 
-        <blockquote>"The best security is that which makes the effort of circumvention exceed the value of what is being protected." — A principle as old as the first locked door.</blockquote>
+        <p>Marcus was quiet for a moment. "No," he said. "We get smarter."</p>
+
+        <div style="text-align:center;margin:32px 0;color:#888;font-size:24px;letter-spacing:8px;">* * *</div>
+
+        <h3>Chapter 1: The Clipboard Wars</h3>
+
+        <p>The first vulnerability Marcus investigated was the most obvious: copy and paste. A reader could simply select all the text on a page, press Ctrl+C, and paste an entire chapter into an email. The browser was delighted to assist.</p>
+
+        <p>"The clipboard is not your friend," Marcus told his team on Monday morning. "It's a highway out of your application, and right now there are no toll booths."</p>
+
+        <p>The solution was deceptively simple. Every <code>copy</code> event, every <code>cut</code> event, every keyboard shortcut that might invoke them — all intercepted. In block mode, the clipboard received nothing. In restrict mode, the reader could copy a sentence or two — enough to cite, enough to share a taste — but not a paragraph, never a page.</p>
+
+        <p>For publishers who wanted to be generous, there was the attribution feature: any copied text would arrive with a trailing line — <em>"Copied from 'The Warden's Handbook' — © Meridian Publishing."</em> The text carried its provenance with it, like a watermark on fine paper.</p>
+
+        <blockquote>"You don't have to stop every thief. You just have to make stealing feel like stealing."</blockquote>
 
         <div style="text-align:center;margin:24px 0;">
           <img src="https://picsum.photos/seed/content-protection/400/200" alt="Sample illustration" style="max-width:100%;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-          <p style="font-size:13px;color:#888;text-indent:0;margin-top:8px;">Fig 1. — A sample illustration (try right-clicking or dragging with Image Protection enabled)</p>
+          <p style="font-size:13px;color:#888;text-indent:0;margin-top:8px;">Fig 1. — The Meridian offices at dusk (try right-clicking or dragging this image)</p>
         </div>
 
-        <h3>Layers of Defense</h3>
+        <h3>Chapter 2: The Phantom Page</h3>
 
-        <p>Modern content protection employs multiple layers, each addressing a different vector of potential extraction. The casual reader who highlights a passage and attempts to email it to a friend encounters the first layer: clipboard interception. The slightly more determined user who opens developer tools meets the second: text obfuscation, where the DOM itself becomes unreliable.</p>
+        <p>The second attack vector was more insidious. A technically inclined reader could open the developer tools and simply read the DOM. Every word of the book was right there in the HTML.</p>
 
-        <p>Beyond these visible defenses lie invisible ones. Watermarks, both visual and textual, serve not to prevent copying but to ensure accountability. Zero-width Unicode characters, invisible to the human eye but perfectly legible to software, carry the identity of the reader through any text that escapes the system's other protections.</p>
+        <p>"Imagine you're reading a physical book," Marcus explained to Elena. "You can see the page in front of you. But imagine that every page you're <em>not</em> looking at is written in cipher. The moment you turn to it, it decrypts. The moment you turn away, it scrambles again."</p>
 
-        <p>The viewport-aware scrambling system represents perhaps the most elegant compromise between usability and security. Text that the reader can see is presented in its original, beautiful form. Text that has scrolled beyond the visible area reverts to its scrambled state, ensuring that any bulk extraction of the DOM yields mostly nonsense.</p>
+        <p>"That's insane," Elena said. "That's brilliant."</p>
 
-        <h3>The Philosophy of Protection</h3>
+        <p>"That's text obfuscation," Marcus said.</p>
 
-        <p>There are those who argue that all digital content should be free, that the very concept of intellectual property is an anachronism. There are others who believe that every unauthorized view is theft. The truth, as usual, lies somewhere between these extremes.</p>
+        <p>The system tracked scroll position with surgical precision. Text within the visible viewport was presented in its original form. But text above or below — text that had scrolled out of sight — was shuffled into nonsense. The characters were all there, rearranged within each word, producing something that looked almost like language but was meaningless.</p>
 
-        <p>What we can say with certainty is that creators deserve to be compensated for their work, and that systems which make unauthorized redistribution difficult — even if not impossible — serve to maintain the economic ecosystem that supports creative endeavor.</p>
+        <p>Anyone who dumped <code>document.body.innerText</code> would get a wall of gibberish sprinkled with a few legible sentences. The mutation observer — a sentinel watching for tampering — would re-scramble any text node that was manually restored.</p>
 
-        <p>This is the purpose of content protection: not to build an impenetrable fortress, but to construct a reasonable boundary that respects both the reader's experience and the creator's rights. The technology exists. The question is simply whether we choose to use it wisely.</p>
+        <div style="text-align:center;margin:32px 0;color:#888;font-size:24px;letter-spacing:8px;">* * *</div>
 
-        <p>As we proceed through the remaining chapters, we will examine each layer of protection in detail, from the simple event listener that intercepts a copy command to the sophisticated obfuscation engine that renders the DOM itself untrustworthy to those who would misuse it.</p>
+        <h3 style="text-align:center;font-size:20px;margin:32px 0 8px;letter-spacing:2px;text-transform:uppercase;color:#888;">Part II</h3>
+        <h2 style="text-align:center;margin-bottom:32px;">The Invisible War</h2>
 
-        <p>The journey begins, as all journeys do, with a single step — or in our case, a single line of code.</p>
+        <h3>Chapter 3: Ghosts in the Machine</h3>
 
-        <p>Let us begin.</p>
+        <p>The third generation of attacks didn't come from humans at all. They came from scripts.</p>
+
+        <p>Marcus had been monitoring the server logs when he noticed the pattern: a single user account loading every page of every book, one after another, at precisely three-second intervals. No human reads that fast. No human reads twenty-six books in a single afternoon.</p>
+
+        <p>"Puppeteer," said Anika, the junior security engineer. "Or Playwright. They're using a headless browser to automate page turns and scrape the text."</p>
+
+        <p>She showed Marcus the detection cascade: WebDriver flags, headless indicators, automation-framework globals, missing browser plugins, screen dimension anomalies. Each check on its own might produce a false positive. Together, they formed a reliable signature.</p>
+
+        <p>"And we re-check every five seconds," Anika added, "because a clever attacker might inject the automation framework <em>after</em> page load."</p>
+
+        <h3>Chapter 4: The Invisible Ink</h3>
+
+        <p>Despite all their defenses, Marcus knew that some content would eventually escape. A determined reader with a camera pointed at their screen could capture any page.</p>
+
+        <p>"If we can't prevent all leaks," he told the team, "we need to be able to trace them."</p>
+
+        <p>The watermarking system operated on two levels. The first was visual: a near-transparent overlay containing the reader's user ID, repeated across the page. At 3% opacity, invisible during normal reading — but if someone posted a screenshot online, adjusting the levels in any image editor would reveal the identity of the leaker.</p>
+
+        <p>The second level was far more subtle. Zero-width Unicode characters — invisible characters that render as nothing on screen — were injected into the content at chosen intervals, encoding the reader's identity in binary. If someone copied text and pasted it anywhere, the zero-width characters traveled with it, invisible and indestructible.</p>
+
+        <p>"It's like invisible ink," Elena said when Marcus demonstrated it.</p>
+
+        <p>"It's better than invisible ink," Marcus replied. "Invisible ink can be washed away. These characters survive copy, paste, email forwarding, even OCR."</p>
+
+        <h3>Chapter 5: The Voice in the Wire</h3>
+
+        <p>The vulnerability report that arrived in April caught everyone off guard. A graduate student in Berlin had discovered that the Web Speech API could be used to extract book content. A script could feed each page into <code>speechSynthesis.speak()</code>, record the output, and run it through speech-to-text to reconstruct the book.</p>
+
+        <p>"That's three transformations," Anika said, impressed despite herself. "Text to speech, speech to recording, recording back to text. Who even thinks of that?"</p>
+
+        <p>"Graduate students with too much time," Marcus said. "Block it."</p>
+
+        <p>The speech synthesis module intercepted the browser's <code>speak()</code> method at the prototype level. In block mode, calls were silently swallowed. In restrict mode, utterances were truncated — enough for accessibility, not enough to extract a full page.</p>
+
+        <h3>Chapter 6: The Ticking Clock</h3>
+
+        <p>The final piece came from an unlikely source: marketing.</p>
+
+        <p>"We have a problem with our free preview program," said the VP of Marketing. "We give readers 24 hours. But 12% of them leave their tabs open indefinitely, reading the entire book without purchasing."</p>
+
+        <p>Marcus smiled. He already had the solution.</p>
+
+        <p>The content expiration module started a timer when a reading session began. As the end approached, a warning fired. When time expired, the content blanked — visibility hidden, the words vanishing like writing in sand. For paid readers, the session could be extended. For preview readers, extensions were limited.</p>
+
+        <div style="text-align:center;margin:32px 0;color:#888;font-size:24px;letter-spacing:8px;">* * *</div>
+
+        <h3 style="text-align:center;font-size:20px;margin:32px 0 8px;letter-spacing:2px;text-transform:uppercase;color:#888;">Part III</h3>
+        <h2 style="text-align:center;margin-bottom:32px;">Reasonable Boundaries</h2>
+
+        <h3>Epilogue</h3>
+
+        <p>Six months after deploying the full suite, Elena pulled up the piracy monitoring dashboard. The numbers had changed dramatically. Not to zero — they would never reach zero. But the casual piracy, the opportunistic scraping, the automated extraction — all of it had dropped by over 80%.</p>
+
+        <p>"We didn't build a fortress," Marcus said during his presentation to the board. "We built a fence. A good fence. The kind that makes good neighbors."</p>
+
+        <p>"Sixteen modules. Zero required dependencies. Framework-agnostic. Tree-shakable. Drop it into any web reader in the world."</p>
+
+        <p>Elena watched the board members' faces and saw something she hadn't seen in a long time: confidence. Not the false confidence of believing a problem was solved, but the quiet confidence of knowing it was managed.</p>
+
+        <p>That was enough. That had always been enough.</p>
+
+        <p style="text-align:center;margin-top:48px;font-style:italic;color:#888;">— END —</p>
       </div>
 
       <div class="annotations-panel" id="annotationsPanel">
         <h3>Highlights &amp; Notes</h3>
         <div class="annotation-item">
-          <div class="highlight-text">The answer lies not in absolute prevention but in graduated deterrence.</div>
-          <div class="note">Key concept — this is our pitch to publishers</div>
+          <div class="highlight-text">You don't have to stop every thief. You just have to make stealing feel like stealing.</div>
+          <div class="note">Ch.1 — Marcus's key insight on deterrence vs prevention</div>
         </div>
         <div class="annotation-item">
-          <div class="highlight-text">Zero-width Unicode characters, invisible to the human eye but perfectly legible to software, carry the identity of the reader.</div>
-          <div class="note">Watermarking approach — new in this release</div>
+          <div class="highlight-text">The clipboard is not your friend. It's a highway out of your application.</div>
+          <div class="note">Ch.1 — Great line for the pitch deck</div>
         </div>
         <div class="annotation-item">
-          <div class="highlight-text">Text that has scrolled beyond the visible area reverts to its scrambled state.</div>
+          <div class="highlight-text">Every page you're not looking at is written in cipher. The moment you turn to it, it decrypts.</div>
+          <div class="note">Ch.2 — Text obfuscation explained simply</div>
         </div>
         <div class="annotation-item">
-          <div class="highlight-text">Not to build an impenetrable fortress, but to construct a reasonable boundary.</div>
-          <div class="note">Good summary for the README</div>
+          <div class="highlight-text">It's better than invisible ink. These characters survive copy, paste, email forwarding, even OCR.</div>
+          <div class="note">Ch.4 — Zero-width watermarking</div>
+        </div>
+        <div class="annotation-item">
+          <div class="highlight-text">We didn't build a fortress. We built a fence. A good fence. The kind that makes good neighbors.</div>
+          <div class="note">Epilogue — use this for the README</div>
         </div>
       </div>
     </div>
