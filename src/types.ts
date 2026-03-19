@@ -29,7 +29,14 @@ export interface ProtectionEvent {
     | "tamper_detected"
     | "visibility_change"
     | "screenshot_suspected"
-    | "browser_unsupported";
+    | "browser_unsupported"
+    | "image_protected"
+    | "automation_detected"
+    | "speech_blocked"
+    | "session_started"
+    | "session_warning"
+    | "session_expired"
+    | "session_extended";
   timestamp: number;
   detail?: string;
 }

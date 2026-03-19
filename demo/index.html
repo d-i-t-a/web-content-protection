@@ -350,6 +350,26 @@
       <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
     </div>
 
+    <div class="module-toggle" data-module="imageProtection">
+      <label><input type="checkbox"> Image Protection <span class="tag tag-new">NEW</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="antiAutomation">
+      <label><input type="checkbox"> Anti-Automation <span class="tag tag-new">NEW</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="speechSynthesisBlocking">
+      <label><input type="checkbox"> Speech Blocking <span class="tag tag-new">NEW</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="contentExpiration">
+      <label><input type="checkbox"> Content Expiration <span class="tag tag-new">NEW</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
     <div style="margin-top: 20px;">
       <h2>Copy Mode</h2>
       <select id="copyMode" style="width: 100%; padding: 8px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; font-size: 13px;">
@@ -372,7 +392,17 @@
 
     <div class="reader-container">
       <div class="book-content" id="bookContent">
-        <h2>Chapter 1: The Art of the Invisible</h2>
+        <h2>@d-i-t-a/web-content-protection</h2>
+
+        <p style="text-indent:0;font-style:italic;color:#555;border-left:3px solid #1f6feb;padding-left:16px;margin-bottom:24px;">A modular, framework-agnostic npm package that provides client-side content protection for web-based ebook readers, digital publishing platforms, and any application serving protected text or media in the browser. Developed by DITA (AM Consulting LLC), the same team behind the R2D2BC reader, this library extracts battle-tested protection techniques into a standalone, tree-shakable package that can be dropped into any web reader — regardless of its underlying architecture.</p>
+
+        <h3>Why This Exists</h3>
+
+        <p>Web-based readers face a fundamental challenge: content rendered in the browser is inherently accessible to the user through developer tools, clipboard operations, print functions, drag-and-drop, screen readers, and automation scripts. While no client-side solution can provide absolute DRM, a well-designed system of graduated deterrence can raise the cost of unauthorized extraction above the threshold most users are willing to bear — protecting publishers' content while preserving the legitimate reading experience.</p>
+
+        <p>This package provides 16 independent protection modules that can be used individually or composed through a single orchestrator. Each addresses a specific extraction vector identified in real-world security audits of commercial ebook platforms.</p>
+
+        <h3>Chapter 1: The Art of the Invisible</h3>
 
         <p>In the quiet chambers of the digital library, where electrons dance across silicon pathways, there exists a peculiar tension between accessibility and preservation. The modern reader expects instant access to the world's knowledge, yet the creators of that knowledge deserve protection for their craft.</p>
 
@@ -385,6 +415,11 @@
         <p>The answer, as it turns out, lies not in absolute prevention but in graduated deterrence. Like the locks on your front door, digital content protection need not be impenetrable to be effective. It need only raise the cost of unauthorized access above the threshold that most would-be infringers are willing to bear.</p>
 
         <blockquote>"The best security is that which makes the effort of circumvention exceed the value of what is being protected." — A principle as old as the first locked door.</blockquote>
+
+        <div style="text-align:center;margin:24px 0;">
+          <img src="https://picsum.photos/seed/content-protection/400/200" alt="Sample illustration" style="max-width:100%;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+          <p style="font-size:13px;color:#888;text-indent:0;margin-top:8px;">Fig 1. — A sample illustration (try right-clicking or dragging with Image Protection enabled)</p>
+        </div>
 
         <h3>Layers of Defense</h3>
 
@@ -533,6 +568,41 @@
         ...targets,
         maxSelectionLength: 300,
         behavior: "collapse",
+      };
+    }
+    if (enabled.imageProtection) {
+      config.imageProtection = {
+        contentRoot: bookContent,
+        disablePointerEvents: true,
+        overlayMode: true,
+        blockDrag: true,
+      };
+    }
+    if (enabled.antiAutomation) {
+      config.antiAutomation = {
+        action: "callback",  // "callback" only for demo
+        detectWebDriver: true,
+        detectHeadless: true,
+        detectAutomationProps: true,
+        recheckInterval: 10000,
+      };
+    }
+    if (enabled.speechSynthesisBlocking) {
+      config.speechSynthesisBlocking = {
+        mode: "block",
+      };
+    }
+    if (enabled.contentExpiration) {
+      config.contentExpiration = {
+        protectedElements: [bookContent, annotationsPanel],
+        sessionDuration: 120000,  // 2 minutes for demo
+        warningBefore: 30000,
+        action: "blank",
+        allowExtension: true,
+        maxExtensions: 3,
+        extensionDuration: 60000,
+        onWarning: (ms) => logEvent({ type: "session_warning", timestamp: Date.now(), detail: `Expires in ${Math.round(ms/1000)}s — click Activate to extend` }),
+        onExpired: () => logEvent({ type: "session_expired", timestamp: Date.now(), detail: "Session expired — content blanked" }),
       };
     }
 

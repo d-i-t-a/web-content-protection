@@ -27,3 +27,7 @@ export { BrowserEnforcement, type BrowserEnforcementConfig } from "./modules/bro
 export { ScreenshotDetection, type ScreenshotDetectionConfig } from "./modules/screenshot-detection";
 export { Watermarking, type WatermarkingConfig } from "./modules/watermarking";
 export { SelectionLimiting, type SelectionLimitingConfig } from "./modules/selection-limiting";
+export { ImageProtection, type ImageProtectionConfig } from "./modules/image-protection";
+export { AntiAutomation, type AntiAutomationConfig } from "./modules/anti-automation";
+export { SpeechSynthesisBlocking, type SpeechSynthesisBlockingConfig } from "./modules/speech-synthesis-blocking";
+export { ContentExpiration, type ContentExpirationConfig } from "./modules/content-expiration";

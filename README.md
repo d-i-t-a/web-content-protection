@@ -29,7 +29,7 @@ npm run demo
 Then open [http://localhost:3456/demo/](http://localhost:3456/demo/) in your browser.
 
 The demo simulates a book reader with:
-- **Left sidebar** — toggle each of the 12 modules on/off
+- **Left sidebar** — toggle each of the 16 modules on/off
 - **Center** — sample book content with active protections
 - **Right panel** — highlights & notes panel (also protected)
 - **Bottom** — live event log showing every blocked action
@@ -83,6 +83,10 @@ Each module can be used standalone or through the orchestrator.
 | **ScreenshotDetection** | Blanks content on tab blur / visibility change / PrintScreen |
 | **Watermarking** | Invisible visual + zero-width-character watermarks for leak tracing |
 | **SelectionLimiting** | Caps how much text can be selected at once |
+| **ImageProtection** | Blocks right-click save, drag, open-in-new-tab on images; optional canvas rendering |
+| **AntiAutomation** | Detects Puppeteer, Playwright, Selenium, headless browsers |
+| **SpeechSynthesisBlocking** | Blocks or restricts `speechSynthesis.speak()` to prevent TTS extraction |
+| **ContentExpiration** | Time-limited viewing sessions with optional extension |
 
 ## Standalone Module Usage
 
@@ -159,6 +163,83 @@ import { Watermarking } from "@d-i-t-a/web-content-protection";
 
 const userId = Watermarking.decodeFingerprint(leakedText);
 console.log(`Leaked by: ${userId}`);
+```
+
+## Image Protection
+
+Prevents image extraction via right-click, drag, and open-in-new-tab.
+
+```typescript
+imageProtection: {
+  contentRoot: bodyEl,
+  disablePointerEvents: true,  // blocks right-click "Save image as..."
+  overlayMode: true,           // transparent overlay above images
+  blockDrag: true,             // prevents drag to desktop/other apps
+  canvasMode: false,           // replace <img> with <canvas> (strongest)
+  blobUrls: false,             // convert src to blob URLs (hides original URL)
+}
+```
+
+## Anti-Automation Detection
+
+Detects headless browsers and automation frameworks (Selenium, Puppeteer, Playwright).
+
+```typescript
+antiAutomation: {
+  action: "block",             // "block" | "warn" | "callback"
+  detectWebDriver: true,       // navigator.webdriver flag
+  detectHeadless: true,        // HeadlessChrome, missing plugins, etc.
+  detectAutomationProps: true,  // framework-specific globals
+  recheckInterval: 5000,       // re-check every 5s (automation can be injected late)
+}
+```
+
+## Speech Synthesis Blocking
+
+Prevents text extraction via the Web Speech API (`speechSynthesis.speak()`).
+
+```typescript
+speechSynthesisBlocking: {
+  mode: "block",               // "block" all or "restrict" to maxCharacters
+  maxCharacters: 500,          // only used in "restrict" mode
+}
+```
+
+## Content Expiration
+
+Time-limited viewing sessions. Content blanks or redirects when the session expires.
+
+```typescript
+contentExpiration: {
+  protectedElements: [contentEl],
+  sessionDuration: 3600000,    // 1 hour
+  warningBefore: 300000,       // warn 5 min before
+  action: "blank",             // "blank" | "redirect" | "callback"
+  allowExtension: true,        // user can extend session
+  maxExtensions: 3,
+  extensionDuration: 1800000,  // 30 min per extension
+  onWarning: (ms) => showToast(`Session expires in ${ms/1000}s`),
+  onExpired: () => showModal("Session expired"),
+}
+```
+
+Extend programmatically:
+```typescript
+protection.contentExpiration!.extend(); // returns false if max extensions reached
+```
+
+## Clipboard Attribution
+
+Appends source attribution to any copied text (in "restrict" mode):
+
+```typescript
+copyProtection: {
+  contentElement: el,
+  mode: "restrict",
+  maxCharacters: 200,
+  attribution: "Copied from 'Book Title' — © Publisher Name",
+  attributionSeparator: "\n\n—\n",
+}
 ```
 
 ## Screenshot Detection

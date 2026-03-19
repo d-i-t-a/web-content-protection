@@ -17,6 +17,10 @@ export interface CopyProtectionConfig extends CommonTargets {
   blockCut?: boolean;
   /** Allow citation bypass (temporarily enable copy for specific workflows) */
   citationBypass?: boolean;
+  /** Attribution text appended to copied content (e.g. "Copied from Book Title — © Publisher") */
+  attribution?: string;
+  /** Separator between copied text and attribution (default: "\n\n—\n") */
+  attributionSeparator?: string;
   onEvent?: ProtectionEventCallback;
 }
 
@@ -87,7 +91,13 @@ export class CopyProtection implements ProtectionModule {
       event.stopPropagation();
       const selection = this.getSelectionText(event.target);
       const maxChars = this.config.maxCharacters ?? 0;
-      const trimmed = selection.substring(0, maxChars);
+      let trimmed = selection.substring(0, maxChars);
+
+      // Append attribution if configured
+      if (this.config.attribution) {
+        const sep = this.config.attributionSeparator ?? "\n\n—\n";
+        trimmed = trimmed + sep + this.config.attribution;
+      }
 
       if (event.clipboardData) {
         event.clipboardData.setData("text/plain", trimmed);

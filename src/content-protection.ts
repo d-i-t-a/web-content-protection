@@ -16,6 +16,10 @@ import { BrowserEnforcement, type BrowserEnforcementConfig } from "./modules/bro
 import { ScreenshotDetection, type ScreenshotDetectionConfig } from "./modules/screenshot-detection";
 import { Watermarking, type WatermarkingConfig } from "./modules/watermarking";
 import { SelectionLimiting, type SelectionLimitingConfig } from "./modules/selection-limiting";
+import { ImageProtection, type ImageProtectionConfig } from "./modules/image-protection";
+import { AntiAutomation, type AntiAutomationConfig } from "./modules/anti-automation";
+import { SpeechSynthesisBlocking, type SpeechSynthesisBlockingConfig } from "./modules/speech-synthesis-blocking";
+import { ContentExpiration, type ContentExpirationConfig } from "./modules/content-expiration";
 
 export interface ContentProtectionConfig {
   /** Global event callback — receives events from all modules */
@@ -34,6 +38,10 @@ export interface ContentProtectionConfig {
   screenshotDetection?: Omit<ScreenshotDetectionConfig, "onEvent">;
   watermarking?: WatermarkingConfig;
   selectionLimiting?: Omit<SelectionLimitingConfig, "onEvent">;
+  imageProtection?: Omit<ImageProtectionConfig, "onEvent">;
+  antiAutomation?: Omit<AntiAutomationConfig, "onEvent">;
+  speechSynthesisBlocking?: Omit<SpeechSynthesisBlockingConfig, "onEvent">;
+  contentExpiration?: Omit<ContentExpirationConfig, "onEvent">;
 }
 
 /**
@@ -106,6 +114,18 @@ export class ContentProtection {
     if (this.config.selectionLimiting) {
       this.modules.set("selection", new SelectionLimiting({ ...this.config.selectionLimiting, onEvent }));
     }
+    if (this.config.imageProtection) {
+      this.modules.set("image", new ImageProtection({ ...this.config.imageProtection, onEvent }));
+    }
+    if (this.config.antiAutomation) {
+      this.modules.set("automation", new AntiAutomation({ ...this.config.antiAutomation, onEvent }));
+    }
+    if (this.config.speechSynthesisBlocking) {
+      this.modules.set("speech", new SpeechSynthesisBlocking({ ...this.config.speechSynthesisBlocking, onEvent }));
+    }
+    if (this.config.contentExpiration) {
+      this.modules.set("expiration", new ContentExpiration({ ...this.config.contentExpiration, onEvent }));
+    }
   }
 
   /** Activate all configured modules. Browser enforcement runs first (may throw). */
@@ -150,6 +170,16 @@ export class ContentProtection {
   /** Get the watermarking module (for reinitialize on page turn) */
   get watermarking(): Watermarking | undefined {
     return this.modules.get("watermark") as Watermarking | undefined;
+  }
+
+  /** Get the content expiration module (for extend/remaining control) */
+  get contentExpiration(): ContentExpiration | undefined {
+    return this.modules.get("expiration") as ContentExpiration | undefined;
+  }
+
+  /** Get the anti-automation module (for manual detection) */
+  get antiAutomation(): AntiAutomation | undefined {
+    return this.modules.get("automation") as AntiAutomation | undefined;
   }
 
   /** Get all logged protection events */
