@@ -22,6 +22,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "demo": "npm run build && npx serve . -l 3456 --no-clipboard",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {

@@ -15,6 +15,28 @@ npm install devtools-detector              # Better DevTools detection
 npm install browserslist-useragent-regexp   # Accurate browser enforcement
 ```
 
+## Demo
+
+An interactive demo is included that lets you toggle each module on/off and test protections in real time.
+
+```bash
+git clone https://github.com/d-i-t-a/content-protection.git
+cd content-protection
+npm install
+npm run demo
+```
+
+Then open [http://localhost:3456/demo/](http://localhost:3456/demo/) in your browser.
+
+The demo simulates a book reader with:
+- **Left sidebar** — toggle each of the 12 modules on/off
+- **Center** — sample book content with active protections
+- **Right panel** — highlights & notes panel (also protected)
+- **Bottom** — live event log showing every blocked action
+- **Toolbar** — test buttons for copy, print, select-all, and innerText dump
+
+Try right-clicking, Ctrl+C, Ctrl+P, dragging text, or opening DevTools to see the protections in action.
+
 ## Quick Start
 
 Use the `ContentProtection` orchestrator to enable multiple protections at once:
