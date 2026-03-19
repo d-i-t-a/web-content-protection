@@ -1,5 +1,5 @@
 {
-  "name": "@d-i-t-a/content-protection",
+  "name": "@d-i-t-a/web-content-protection",
   "version": "1.0.0",
   "description": "Client-side content protection for web-based ebook readers. Drag prevention, copy protection, print blocking, text obfuscation, DevTools detection, and more.",
   "author": "AM Consulting LLC (DITA)",
@@ -45,6 +45,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/d-i-t-a/content-protection"
+    "url": "https://github.com/d-i-t-a/web-content-protection"
   }
 }

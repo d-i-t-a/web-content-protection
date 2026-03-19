@@ -1,11 +1,11 @@
-# @d-i-t-a/content-protection
+# @d-i-t-a/web-content-protection
 
 Client-side content protection for web-based ebook readers. Framework-agnostic, zero required dependencies, tree-shakable.
 
 ## Install
 
 ```bash
-npm install @d-i-t-a/content-protection
+npm install @d-i-t-a/web-content-protection
 ```
 
 Optional dependencies for enhanced features:
@@ -20,8 +20,8 @@ npm install browserslist-useragent-regexp   # Accurate browser enforcement
 An interactive demo is included that lets you toggle each module on/off and test protections in real time.
 
 ```bash
-git clone https://github.com/d-i-t-a/content-protection.git
-cd content-protection
+git clone https://github.com/d-i-t-a/web-content-protection.git
+cd web-content-protection
 npm install
 npm run demo
 ```
@@ -42,7 +42,7 @@ Try right-clicking, Ctrl+C, Ctrl+P, dragging text, or opening DevTools to see th
 Use the `ContentProtection` orchestrator to enable multiple protections at once:
 
 ```typescript
-import { ContentProtection } from "@d-i-t-a/content-protection";
+import { ContentProtection } from "@d-i-t-a/web-content-protection";
 
 const contentEl = document.getElementById("reader-content")!;
 const iframes = Array.from(document.querySelectorAll("iframe")) as HTMLIFrameElement[];
@@ -87,7 +87,7 @@ Each module can be used standalone or through the orchestrator.
 ## Standalone Module Usage
 
 ```typescript
-import { CopyProtection } from "@d-i-t-a/content-protection";
+import { CopyProtection } from "@d-i-t-a/web-content-protection";
 
 const copy = new CopyProtection({
   contentElement: document.getElementById("reader")!,
@@ -155,7 +155,7 @@ watermarking: {
 
 Decode a fingerprint from leaked text:
 ```typescript
-import { Watermarking } from "@d-i-t-a/content-protection";
+import { Watermarking } from "@d-i-t-a/web-content-protection";
 
 const userId = Watermarking.decodeFingerprint(leakedText);
 console.log(`Leaked by: ${userId}`);
