@@ -131,6 +131,8 @@
     .content-area {
       display: flex;
       flex-direction: column;
+      min-height: 0; /* allows children to scroll instead of expanding */
+      overflow: hidden;
     }
 
     .toolbar {
@@ -161,6 +163,7 @@
       display: flex;
       gap: 0;
       overflow: hidden;
+      min-height: 0; /* critical: allows flex children to shrink below content size */
     }
 
     .book-content {
@@ -173,6 +176,7 @@
       font-size: 17px;
       line-height: 1.8;
       position: relative;
+      min-height: 0; /* critical: prevents flex item from expanding to content height */
     }
 
     .book-content h2 {

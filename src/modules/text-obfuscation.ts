@@ -54,19 +54,22 @@ export class TextObfuscation implements ProtectionModule {
     // Security sentinel — if its style is tampered with, flag as hacked
     this.securityContainer = document.createElement("div");
     this.securityContainer.setAttribute("data-protection", "sentinel");
-    this.securityContainer.style.cssText = "";
     this.config.contentRoot.appendChild(this.securityContainer);
-
-    // Build obfuscation rects
-    this.rects = this.findRects(this.config.contentRoot);
-    this.updateAllRects();
+    // Remove any style attribute the browser may have added
+    this.securityContainer.removeAttribute("style");
 
     // Listen for scroll/resize
     this.config.scrollContainer.addEventListener("scroll", this.scrollHandler, { passive: true });
     window.addEventListener("resize", this.resizeHandler, { passive: true });
 
-    // Watch for DOM tampering
-    this.startMutationObserver();
+    // Delay rect scanning until after layout stabilizes (fonts loaded, flex computed)
+    // This ensures getBoundingClientRect returns correct positions
+    requestAnimationFrame(() => {
+      this.rects = this.findRects(this.config.contentRoot);
+      this.updateAllRects();
+      // Start mutation observer after initial scramble to avoid false positives
+      this.startMutationObserver();
+    });
   }
 
   deactivate(): void {
@@ -153,35 +156,40 @@ export class TextObfuscation implements ProtectionModule {
   }
 
   private isOutsideViewport(rect: ObfuscationRect): boolean {
-    const c = this.config.scrollContainer;
     const pad = this.config.viewportPadding ?? 50;
 
-    // Account for line height for smoother transitions
+    // Use fresh getBoundingClientRect for both the node and the container
+    // so we're comparing in the same coordinate system (viewport-relative)
+    const containerRect = this.config.scrollContainer.getBoundingClientRect();
+    const nodeRect = this.measureTextNode(rect.node);
+
+    // Update stored positions for consistency
+    rect.top = nodeRect.top;
+    rect.left = nodeRect.left;
+    rect.width = nodeRect.width;
+    rect.height = nodeRect.height;
+
     const lineHeight = this.getLineHeight(rect.node);
 
-    const windowLeft = c.scrollLeft;
-    const windowRight = windowLeft + c.clientWidth;
-    const windowTop = c.scrollTop - lineHeight;
-    const windowBottom = windowTop + c.clientHeight + lineHeight + pad;
-
-    const right = rect.left + rect.width;
-    const bottom = rect.top + rect.height;
-
-    const isAbove = bottom < windowTop;
-    const isBelow = rect.top > windowBottom;
+    const isAbove = nodeRect.bottom < containerRect.top - lineHeight;
+    const isBelow = nodeRect.top > containerRect.bottom + lineHeight + pad;
     // Wider horizontal margins for paginated content
-    const isLeft = right < windowLeft - window.innerWidth;
-    const isRight = rect.left > windowRight + window.innerWidth;
+    const isLeft = nodeRect.right < containerRect.left - containerRect.width;
+    const isRight = nodeRect.left > containerRect.right + containerRect.width;
 
     return isAbove || isBelow || isLeft || isRight;
   }
 
   private isBeingHacked(element: HTMLElement): boolean {
+    // Only flag as hacked if the sentinel has meaningful style changes
+    // (not just an empty or whitespace-only style attribute)
+    const style = element.getAttribute("style");
+    const hasRealStyle = !!style && style.trim().length > 0;
     return !!(
       element.style.animation ||
       element.style.transition ||
       element.style.position ||
-      element.hasAttribute("style")
+      hasRealStyle
     );
   }
 
