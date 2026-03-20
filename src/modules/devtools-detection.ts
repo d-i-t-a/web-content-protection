@@ -71,26 +71,19 @@ export class DevToolsDetection implements ProtectionModule {
 
   private startHeuristicDetection(): void {
     this.timer = setInterval(() => {
-      if (this.isDevToolsOpen()) {
+      if (!this.detected && this.isDevToolsOpen()) {
         this.onDetected();
       }
     }, this.config.interval);
   }
 
   private isDevToolsOpen(): boolean {
-    // Heuristic 1: window outer/inner size diff (docked DevTools)
-    const widthDelta = window.outerWidth - window.innerWidth > 160;
-    const heightDelta = window.outerHeight - window.innerHeight > 160;
+    // Heuristic: window outer/inner size diff (docked DevTools)
+    // Use a generous threshold to avoid false positives from browser
+    // sidebars, bookmarks bar, or non-maximized windows
+    const widthDelta = window.outerWidth - window.innerWidth > 200;
+    const heightDelta = window.outerHeight - window.innerHeight > 200;
     if (widthDelta || heightDelta) return true;
-
-    // Heuristic 2: console timing (DevTools console slows operations)
-    try {
-      const start = performance.now();
-      for (let i = 0; i < 100; i++) console.debug();
-      if (performance.now() - start > 10) return true;
-    } catch {
-      // ignore
-    }
 
     return false;
   }
