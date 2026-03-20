@@ -22,9 +22,9 @@ interface ObfuscationRect {
   textContent: string;
   scrambledTextContent: string;
   isObfuscated: boolean;
-  top: number;
-  left: number;
-  width: number;
+  /** Document-relative top position (stable across scroll) */
+  offsetTop: number;
+  /** Approximate height */
   height: number;
 }
 
@@ -48,7 +48,10 @@ export class TextObfuscation implements ProtectionModule {
     };
     this.excludeSet = new Set(this.config.excludeNodes!.map((n) => n.toLowerCase()));
     this.scrollHandler = () => this.scheduleUpdate();
-    this.resizeHandler = () => this.scheduleUpdate();
+    this.resizeHandler = () => {
+      this.remeasurePositions();
+      this.scheduleUpdate();
+    };
   }
 
   activate(): void {
@@ -64,7 +67,6 @@ export class TextObfuscation implements ProtectionModule {
     window.addEventListener("resize", this.resizeHandler, { passive: true });
 
     // Delay rect scanning until after layout stabilizes (fonts loaded, flex computed)
-    // This ensures getBoundingClientRect returns correct positions
     requestAnimationFrame(() => {
       this.rects = this.findRects(this.config.contentRoot);
       this.updateAllRects();
@@ -114,13 +116,7 @@ export class TextObfuscation implements ProtectionModule {
 
   /** Recalculate positions after layout changes (font size, window resize) */
   recalculate(): void {
-    for (const rect of this.rects) {
-      const bounds = this.measureTextNode(rect.node);
-      rect.top = bounds.top;
-      rect.left = bounds.left;
-      rect.width = bounds.width;
-      rect.height = bounds.height;
-    }
+    this.remeasurePositions();
     this.updateAllRects();
   }
 
@@ -139,53 +135,38 @@ export class TextObfuscation implements ProtectionModule {
       this.config.onEvent?.({ type: "tamper_detected", timestamp: Date.now() });
     }
 
-    // Cache container rect once per cycle instead of per-node
-    const containerRect = this.config.scrollContainer.getBoundingClientRect();
+    // Determine the visible scroll range in document-relative coordinates
+    // scrollTop = how far the container is scrolled
+    // clientHeight = visible height of the container
+    const container = this.config.scrollContainer;
+    const scrollTop = container.scrollTop;
+    const viewportHeight = container.clientHeight;
     const pad = this.config.viewportPadding ?? 50;
+
+    // Visible range in document-relative space
+    const visibleTop = scrollTop - pad;
+    const visibleBottom = scrollTop + viewportHeight + pad;
 
     // Disconnect mutation observer during our own updates to prevent
     // the observer from re-scrambling text we're intentionally unscrambling
     this.mutationObserver?.disconnect();
     for (const rect of this.rects) {
-      this.toggleRect(rect, hacked, containerRect, pad);
+      const nodeBottom = rect.offsetTop + rect.height;
+      const outside = nodeBottom < visibleTop || rect.offsetTop > visibleBottom;
+
+      // Unscramble: in viewport and not tampered
+      if (rect.isObfuscated && !outside && !hacked && !this.isHacked) {
+        rect.node.textContent = rect.textContent;
+        rect.isObfuscated = false;
+      }
+
+      // Scramble: outside viewport or tampered
+      if (!rect.isObfuscated && (outside || hacked || this.isHacked)) {
+        rect.node.textContent = rect.scrambledTextContent;
+        rect.isObfuscated = true;
+      }
     }
     this.reconnectMutationObserver();
-  }
-
-  private toggleRect(rect: ObfuscationRect, hacked: boolean, containerRect: DOMRect, pad: number): void {
-    const outside = this.isOutsideViewport(rect, containerRect, pad);
-
-    // Unscramble: in viewport and not tampered
-    if (rect.isObfuscated && !outside && !hacked && !this.isHacked) {
-      rect.node.textContent = rect.textContent;
-      rect.isObfuscated = false;
-    }
-
-    // Scramble: outside viewport or tampered
-    if (!rect.isObfuscated && (outside || hacked || this.isHacked)) {
-      rect.node.textContent = rect.scrambledTextContent;
-      rect.isObfuscated = true;
-    }
-  }
-
-  private isOutsideViewport(rect: ObfuscationRect, containerRect: DOMRect, pad: number): boolean {
-    const nodeRect = this.measureTextNode(rect.node);
-
-    // Update stored positions for consistency
-    rect.top = nodeRect.top;
-    rect.left = nodeRect.left;
-    rect.width = nodeRect.width;
-    rect.height = nodeRect.height;
-
-    // Use a fixed buffer instead of per-node getComputedStyle (expensive)
-    const buffer = 20;
-
-    const isAbove = nodeRect.bottom < containerRect.top - buffer;
-    const isBelow = nodeRect.top > containerRect.bottom + buffer + pad;
-    const isLeft = nodeRect.right < containerRect.left - containerRect.width;
-    const isRight = nodeRect.left > containerRect.right + containerRect.width;
-
-    return isAbove || isBelow || isLeft || isRight;
   }
 
   private isBeingHacked(element: HTMLElement): boolean {
@@ -201,8 +182,17 @@ export class TextObfuscation implements ProtectionModule {
     );
   }
 
+  /**
+   * Measure all text node positions once.
+   * Positions are stored as offsets relative to the scroll container's
+   * scrollable area (i.e., document-relative, not viewport-relative).
+   * This way, scroll updates only need scrollTop — no per-node measurement.
+   */
   private findRects(parent: HTMLElement): ObfuscationRect[] {
     const textNodes = this.findTextNodes(parent);
+    const containerRect = this.config.scrollContainer.getBoundingClientRect();
+    const scrollTop = this.config.scrollContainer.scrollTop;
+
     return textNodes.map((node) => {
       const parentTag = (node.parentElement?.nodeName ?? "").toLowerCase();
       const shouldExclude = this.excludeSet.has(parentTag);
@@ -210,17 +200,31 @@ export class TextObfuscation implements ProtectionModule {
       const scrambled = shouldExclude ? text : this.scramble(text);
       const bounds = this.measureTextNode(node);
 
+      // Convert viewport-relative position to document-relative
+      // by adding scrollTop and subtracting container's viewport offset
+      const offsetTop = bounds.top - containerRect.top + scrollTop;
+
       return {
         node,
         textContent: text,
         scrambledTextContent: scrambled,
         isObfuscated: false,
-        top: bounds.top,
-        left: bounds.left,
-        width: bounds.width,
+        offsetTop,
         height: bounds.height,
       };
     });
+  }
+
+  /** Re-measure all positions (on resize/layout change) without re-finding nodes */
+  private remeasurePositions(): void {
+    const containerRect = this.config.scrollContainer.getBoundingClientRect();
+    const scrollTop = this.config.scrollContainer.scrollTop;
+
+    for (const rect of this.rects) {
+      const bounds = this.measureTextNode(rect.node);
+      rect.offsetTop = bounds.top - containerRect.top + scrollTop;
+      rect.height = bounds.height;
+    }
   }
 
   private findTextNodes(parent: Node, nodes: Node[] = []): Node[] {
@@ -246,17 +250,6 @@ export class TextObfuscation implements ProtectionModule {
     } catch {
       return new DOMRect(0, 0, 0, 0);
     }
-  }
-
-  private getLineHeight(node: Node): number {
-    try {
-      if (node.parentElement) {
-        return parseInt(getComputedStyle(node.parentElement).lineHeight.replace("px", "")) || 10;
-      }
-    } catch {
-      // ignore
-    }
-    return 10;
   }
 
   /** Scramble text by shuffling characters within each word */

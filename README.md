@@ -2,6 +2,30 @@
 
 Client-side content protection for web-based ebook readers. Framework-agnostic, zero required dependencies, tree-shakable.
 
+## Table of Contents
+
+- [Install](#install)
+- [Demo](#demo)
+- [Quick Start](#quick-start)
+- [Modules](#modules)
+- [Standalone Module Usage](#standalone-module-usage)
+- [Copy Protection Modes](#copy-protection-modes)
+- [Text Obfuscation](#text-obfuscation)
+- [Watermarking](#watermarking)
+- [Image Protection](#image-protection)
+- [Anti-Automation Detection](#anti-automation-detection)
+- [Speech Synthesis Blocking](#speech-synthesis-blocking)
+- [Content Expiration](#content-expiration)
+- [Clipboard Attribution](#clipboard-attribution)
+- [Media Protection](#media-protection)
+- [Media Stream Protection](#media-stream-protection)
+- [Tamper Detection](#tamper-detection)
+- [Screenshot Detection](#screenshot-detection)
+- [Page Navigation](#page-navigation)
+- [Event Logging](#event-logging)
+- [Integration Notes](#integration-notes)
+- [License](#license)
+
 ## Install
 
 ```bash
