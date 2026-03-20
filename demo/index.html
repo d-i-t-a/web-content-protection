@@ -825,7 +825,8 @@
     await protection.activate();
     isActive = true;
     statusDot.classList.add("active");
-    statusText.textContent = `Active (${Object.keys(config).filter(k => k !== "onEvent").length} modules)`;
+    const activeCount = document.querySelectorAll(".module-toggle .toggle-switch input:checked").length;
+    statusText.textContent = `Active (${activeCount} modules)`;
     logEvent({ type: "system", timestamp: Date.now(), detail: "Protection activated" });
 
     // Start session timer if content expiration is active
