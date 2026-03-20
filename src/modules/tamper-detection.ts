@@ -30,7 +30,6 @@ export interface TamperDetectionConfig {
 export class TamperDetection implements ProtectionModule {
   private config: TamperDetectionConfig;
   private sentinels: HTMLDivElement[] = [];
-  private observer: MutationObserver | null = null;
   private isHacked = false;
   private savedVisibility = new Map<HTMLElement, string>();
   private restoreTimer: ReturnType<typeof setTimeout> | null = null;
@@ -77,9 +76,11 @@ export class TamperDetection implements ProtectionModule {
     }
     this.sentinels = [];
 
-    // Disconnect observer
-    this.observer?.disconnect();
-    this.observer = null;
+    // Disconnect observers
+    for (const obs of this.observers) {
+      obs.disconnect();
+    }
+    this.observers = [];
 
     // Clear timers
     if (this.restoreTimer !== null) {
@@ -132,24 +133,33 @@ export class TamperDetection implements ProtectionModule {
    * Screen grabbers (GoFullPage, Nimbus Screenshot, Awesome Screenshot, etc.)
    * inject CSS styles like animation, transition, or transform to time their captures.
    */
-  private startObserver(): void {
-    this.observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        // Check if a sentinel was targeted
-        const target = mutation.target as HTMLElement;
-        const isSentinel =
-          this.sentinels.includes(target as HTMLDivElement) ||
-          (target.parentElement &&
-            this.sentinels.includes(target.parentElement as HTMLDivElement));
+  private observers: MutationObserver[] = [];
 
-        if (isSentinel && mutation.type === "attributes") {
-          if (mutation.attributeName === "style" || mutation.attributeName === "class") {
-            this.onTamperDetected("sentinel_style_injected");
-            return;
+  private startObserver(): void {
+    // Observe each sentinel individually for attribute changes
+    // Do NOT observe the whole contentRoot subtree — that causes infinite loops
+    // when blankContent() modifies styles on protected elements
+    for (const sentinel of this.sentinels) {
+      const attrObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.type === "attributes") {
+            if (mutation.attributeName === "style" || mutation.attributeName === "class") {
+              this.onTamperDetected("sentinel_style_injected");
+              return;
+            }
           }
         }
+      });
+      attrObserver.observe(sentinel, {
+        attributes: true,
+        attributeFilter: ["style", "class"],
+      });
+      this.observers.push(attrObserver);
+    }
 
-        // Check if sentinel was removed from DOM
+    // Observe contentRoot direct children only (not subtree) for sentinel removal
+    const childObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
         if (mutation.type === "childList") {
           for (const removed of mutation.removedNodes) {
             if (this.sentinels.includes(removed as HTMLDivElement)) {
@@ -160,20 +170,11 @@ export class TamperDetection implements ProtectionModule {
         }
       }
     });
-
-    // Observe the content root for child removal and sentinel attribute changes
-    this.observer.observe(this.config.contentRoot, {
+    childObserver.observe(this.config.contentRoot, {
       childList: true,
-      subtree: true,
+      subtree: false,
     });
-
-    // Also observe each sentinel specifically for attribute changes
-    for (const sentinel of this.sentinels) {
-      this.observer.observe(sentinel, {
-        attributes: true,
-        attributeFilter: ["style", "class"],
-      });
-    }
+    this.observers.push(childObserver);
   }
 
   /**
