@@ -6,8 +6,10 @@
 import type { ProtectionModule } from "../types";
 
 export interface LinkUrlHidingConfig {
+  /** Root element containing links to hide (direct DOM) */
+  contentRoot?: HTMLElement;
   /** Iframes containing book content with links to hide */
-  contentIframes: HTMLIFrameElement[];
+  contentIframes?: HTMLIFrameElement[];
 }
 
 /**
@@ -24,52 +26,68 @@ export class LinkUrlHiding implements ProtectionModule {
   }
 
   activate(): void {
-    for (const iframe of this.config.contentIframes) {
-      try {
-        const doc = iframe.contentDocument;
-        if (!doc) continue;
+    // Process direct DOM content
+    if (this.config.contentRoot) {
+      this.hideLinksIn(this.config.contentRoot);
+    }
 
-        const anchors = doc.querySelectorAll("a");
-        anchors.forEach((a) => {
-          const href = a.getAttribute("href");
-          if (!href) return;
-
-          // Store original values
-          if (!a.getAttribute("data-href")) {
-            a.setAttribute("data-href", href);
-            a.setAttribute("data-href-resolved", a.href);
-          }
-
-          // Clear visible href
-          a.setAttribute("href", "");
-
-          // Navigate on click using stored value
-          const handler = (ev: Event) => {
-            ev.preventDefault();
-            const resolvedHref = (ev.currentTarget as HTMLAnchorElement).getAttribute("data-href-resolved");
-            if (resolvedHref) {
-              const nav = document.createElement("a");
-              nav.setAttribute("href", resolvedHref);
-              nav.click();
-            }
-          };
-          a.addEventListener("click", handler);
-          this.clickHandlers.push({ element: a, handler });
-        });
-      } catch {
-        // cross-origin iframe
+    // Process iframes
+    if (this.config.contentIframes) {
+      for (const iframe of this.config.contentIframes) {
+        try {
+          const body = iframe.contentDocument?.body;
+          if (body) this.hideLinksIn(body);
+        } catch {
+          // cross-origin iframe
+        }
       }
     }
   }
 
+  private hideLinksIn(root: HTMLElement): void {
+    const anchors = root.querySelectorAll("a[href]");
+    anchors.forEach((a) => {
+      const anchor = a as HTMLAnchorElement;
+      const href = anchor.getAttribute("href");
+      if (!href || href === "" || href === "#") return;
+
+      // Store original values
+      if (!anchor.getAttribute("data-href")) {
+        anchor.setAttribute("data-href", href);
+        anchor.setAttribute("data-href-resolved", anchor.href);
+      }
+
+      // Clear visible href so status bar shows nothing
+      anchor.removeAttribute("href");
+      anchor.style.cursor = "pointer";
+      // Keep the visual appearance of a link
+      if (!anchor.style.color) {
+        anchor.style.textDecoration = "underline";
+      }
+
+      // Navigate on click using stored value
+      const handler = (ev: Event) => {
+        ev.preventDefault();
+        const resolvedHref = (ev.currentTarget as HTMLAnchorElement).getAttribute("data-href-resolved");
+        if (resolvedHref) {
+          window.open(resolvedHref, anchor.getAttribute("target") || "_blank");
+        }
+      };
+      anchor.addEventListener("click", handler);
+      this.clickHandlers.push({ element: anchor, handler });
+    });
+  }
+
   deactivate(): void {
-    // Restore original hrefs
     for (const { element, handler } of this.clickHandlers) {
       element.removeEventListener("click", handler);
       const originalHref = element.getAttribute("data-href");
       if (originalHref) {
         element.setAttribute("href", originalHref);
+        element.style.cursor = "";
       }
+      element.removeAttribute("data-href");
+      element.removeAttribute("data-href-resolved");
     }
     this.clickHandlers = [];
   }
