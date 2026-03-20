@@ -20,6 +20,8 @@ import { ImageProtection, type ImageProtectionConfig } from "./modules/image-pro
 import { AntiAutomation, type AntiAutomationConfig } from "./modules/anti-automation";
 import { SpeechSynthesisBlocking, type SpeechSynthesisBlockingConfig } from "./modules/speech-synthesis-blocking";
 import { ContentExpiration, type ContentExpirationConfig } from "./modules/content-expiration";
+import { MediaProtection, type MediaProtectionConfig } from "./modules/media-protection";
+import { MediaStreamProtection, type MediaStreamProtectionConfig } from "./modules/media-stream-protection";
 
 export interface ContentProtectionConfig {
   /** Global event callback — receives events from all modules */
@@ -42,6 +44,8 @@ export interface ContentProtectionConfig {
   antiAutomation?: Omit<AntiAutomationConfig, "onEvent">;
   speechSynthesisBlocking?: Omit<SpeechSynthesisBlockingConfig, "onEvent">;
   contentExpiration?: Omit<ContentExpirationConfig, "onEvent">;
+  mediaProtection?: Omit<MediaProtectionConfig, "onEvent">;
+  mediaStreamProtection?: Omit<MediaStreamProtectionConfig, "onEvent">;
 }
 
 /**
@@ -125,6 +129,12 @@ export class ContentProtection {
     }
     if (this.config.contentExpiration) {
       this.modules.set("expiration", new ContentExpiration({ ...this.config.contentExpiration, onEvent }));
+    }
+    if (this.config.mediaProtection) {
+      this.modules.set("media", new MediaProtection({ ...this.config.mediaProtection, onEvent }));
+    }
+    if (this.config.mediaStreamProtection) {
+      this.modules.set("mediaStream", new MediaStreamProtection({ ...this.config.mediaStreamProtection, onEvent }));
     }
   }
 

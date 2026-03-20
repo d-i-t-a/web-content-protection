@@ -31,3 +31,5 @@ export { ImageProtection, type ImageProtectionConfig } from "./modules/image-pro
 export { AntiAutomation, type AntiAutomationConfig } from "./modules/anti-automation";
 export { SpeechSynthesisBlocking, type SpeechSynthesisBlockingConfig } from "./modules/speech-synthesis-blocking";
 export { ContentExpiration, type ContentExpirationConfig } from "./modules/content-expiration";
+export { MediaProtection, type MediaProtectionConfig } from "./modules/media-protection";
+export { MediaStreamProtection, type MediaStreamProtectionConfig } from "./modules/media-stream-protection";

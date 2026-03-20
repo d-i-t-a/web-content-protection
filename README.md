@@ -29,7 +29,7 @@ npm run demo
 Then open [http://localhost:3456/demo/](http://localhost:3456/demo/) in your browser.
 
 The demo simulates a book reader with:
-- **Left sidebar** — toggle each of the 16 modules on/off
+- **Left sidebar** — toggle each of the 18 modules on/off
 - **Center** — sample book content with active protections
 - **Right panel** — highlights & notes panel (also protected)
 - **Bottom** — live event log showing every blocked action
@@ -87,6 +87,8 @@ Each module can be used standalone or through the orchestrator.
 | **AntiAutomation** | Detects Puppeteer, Playwright, Selenium, headless browsers |
 | **SpeechSynthesisBlocking** | Blocks or restricts `speechSynthesis.speak()` to prevent TTS extraction |
 | **ContentExpiration** | Time-limited viewing sessions with optional extension |
+| **MediaProtection** | Protects `<audio>` and `<video>` elements — hides download button, blob URLs, blocks right-click, disables PiP |
+| **MediaStreamProtection** | Blocks MediaRecorder, AudioContext capture, and `captureStream()` on protected elements |
 
 ## Standalone Module Usage
 
@@ -241,6 +243,38 @@ copyProtection: {
   attributionSeparator: "\n\n—\n",
 }
 ```
+
+## Media Protection
+
+Protects `<audio>` and `<video>` elements embedded in EPUB3 or any HTML content. Especially relevant for enriched ebooks, educational content, and audiobook previews.
+
+```typescript
+mediaProtection: {
+  contentRoot: bodyEl,
+  hideDownloadButton: true,     // CSS-hides the native download button
+  blobUrls: true,               // converts src to blob: URLs (hides original URL)
+  blockContextMenu: true,       // blocks right-click "Save audio/video as..."
+  enforceNoDownload: true,      // sets controlslist="nodownload"
+  disablePictureInPicture: true, // prevents PiP on video elements
+  protectSourceUrls: true,      // intercepts currentSrc getter
+  detectRecording: false,       // detect virtual audio devices (heuristic)
+}
+```
+
+## Media Stream Protection
+
+Blocks JavaScript-based stream capture — MediaRecorder, AudioContext routing, and `captureStream()`.
+
+```typescript
+mediaStreamProtection: {
+  contentRoot: bodyEl,
+  blockMediaRecorder: true,     // blocks new MediaRecorder() on protected streams
+  blockAudioCapture: true,      // blocks createMediaElementSource() routing
+  blockCaptureStream: true,     // blocks captureStream() on media + canvas
+}
+```
+
+These two modules are designed for EPUB3 media content rendered inside a web reader. The audio/video files end up as `<audio>`/`<video>` elements in the DOM — same context as the text, same protection surface.
 
 ## Screenshot Detection
 

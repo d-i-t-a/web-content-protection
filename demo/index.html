@@ -370,6 +370,16 @@
       <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
     </div>
 
+    <div class="module-toggle" data-module="mediaProtection">
+      <label><input type="checkbox"> Media Protection <span class="tag tag-new">NEW</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="mediaStreamProtection">
+      <label><input type="checkbox"> Stream Protection <span class="tag tag-new">NEW</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
     <div style="margin-top: 20px;">
       <h2>Copy Mode</h2>
       <select id="copyMode" style="width: 100%; padding: 8px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; font-size: 13px;">
@@ -438,6 +448,14 @@
           <p style="font-size:13px;color:#888;text-indent:0;margin-top:8px;">Fig 1. — The Meridian offices at dusk (try right-clicking or dragging this image)</p>
         </div>
 
+        <div style="background:#f0f0f0;border-radius:8px;padding:16px;margin:24px 0;">
+          <p style="text-indent:0;font-size:13px;color:#666;margin-bottom:8px;font-family:system-ui,sans-serif;font-weight:600;">Audiobook Narration — Chapter 1 Excerpt</p>
+          <audio controls style="width:100%;" src="https://upload.wikimedia.org/wikipedia/commons/4/47/Sound_example_of_a_bass_guitar.ogg">
+            Your browser does not support the audio element.
+          </audio>
+          <p style="text-indent:0;font-size:11px;color:#999;margin-top:6px;font-family:system-ui,sans-serif;">Try right-clicking or inspecting this element with Media Protection enabled</p>
+        </div>
+
         <h3>Chapter 2: The Phantom Page</h3>
 
         <p>The second attack vector was more insidious. A technically inclined reader could open the developer tools and simply read the DOM. Every word of the book was right there in the HTML.</p>
@@ -468,6 +486,14 @@
         <p>She showed Marcus the detection cascade: WebDriver flags, headless indicators, automation-framework globals, missing browser plugins, screen dimension anomalies. Each check on its own might produce a false positive. Together, they formed a reliable signature.</p>
 
         <p>"And we re-check every five seconds," Anika added, "because a clever attacker might inject the automation framework <em>after</em> page load."</p>
+
+        <div style="background:#f0f0f0;border-radius:8px;padding:16px;margin:24px 0;">
+          <p style="text-indent:0;font-size:13px;color:#666;margin-bottom:8px;font-family:system-ui,sans-serif;font-weight:600;">Video Supplement — Inside the Server Room</p>
+          <video controls style="width:100%;border-radius:4px;background:#000;" poster="https://picsum.photos/seed/video-poster/480/270" src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm">
+            Your browser does not support the video element.
+          </video>
+          <p style="text-indent:0;font-size:11px;color:#999;margin-top:6px;font-family:system-ui,sans-serif;">Try downloading, right-clicking, or using captureStream() with Stream Protection enabled</p>
+        </div>
 
         <h3>Chapter 4: The Invisible Ink</h3>
 
@@ -687,6 +713,26 @@
         extensionDuration: 60000,
         onWarning: (ms) => logEvent({ type: "session_warning", timestamp: Date.now(), detail: `Expires in ${Math.round(ms/1000)}s — click Activate to extend` }),
         onExpired: () => logEvent({ type: "session_expired", timestamp: Date.now(), detail: "Session expired — content blanked" }),
+      };
+    }
+
+    if (enabled.mediaProtection) {
+      config.mediaProtection = {
+        contentRoot: bookContent,
+        hideDownloadButton: true,
+        blobUrls: false,  // disabled for demo (cross-origin sample files)
+        blockContextMenu: true,
+        enforceNoDownload: true,
+        disablePictureInPicture: true,
+        protectSourceUrls: true,
+      };
+    }
+    if (enabled.mediaStreamProtection) {
+      config.mediaStreamProtection = {
+        contentRoot: bookContent,
+        blockMediaRecorder: true,
+        blockAudioCapture: true,
+        blockCaptureStream: true,
       };
     }
 

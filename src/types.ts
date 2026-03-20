@@ -36,7 +36,9 @@ export interface ProtectionEvent {
     | "session_started"
     | "session_warning"
     | "session_expired"
-    | "session_extended";
+    | "session_extended"
+    | "media_protected"
+    | "media_stream_blocked";
   timestamp: number;
   detail?: string;
 }
