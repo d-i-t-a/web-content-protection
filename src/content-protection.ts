@@ -22,6 +22,7 @@ import { SpeechSynthesisBlocking, type SpeechSynthesisBlockingConfig } from "./m
 import { ContentExpiration, type ContentExpirationConfig } from "./modules/content-expiration";
 import { MediaProtection, type MediaProtectionConfig } from "./modules/media-protection";
 import { MediaStreamProtection, type MediaStreamProtectionConfig } from "./modules/media-stream-protection";
+import { TamperDetection, type TamperDetectionConfig } from "./modules/tamper-detection";
 
 export interface ContentProtectionConfig {
   /** Global event callback — receives events from all modules */
@@ -46,6 +47,7 @@ export interface ContentProtectionConfig {
   contentExpiration?: Omit<ContentExpirationConfig, "onEvent">;
   mediaProtection?: Omit<MediaProtectionConfig, "onEvent">;
   mediaStreamProtection?: Omit<MediaStreamProtectionConfig, "onEvent">;
+  tamperDetection?: Omit<TamperDetectionConfig, "onEvent">;
 }
 
 /**
@@ -135,6 +137,9 @@ export class ContentProtection {
     }
     if (this.config.mediaStreamProtection) {
       this.modules.set("mediaStream", new MediaStreamProtection({ ...this.config.mediaStreamProtection, onEvent }));
+    }
+    if (this.config.tamperDetection) {
+      this.modules.set("tamper", new TamperDetection({ ...this.config.tamperDetection, onEvent }));
     }
   }
 

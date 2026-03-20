@@ -1,0 +1,312 @@
+/*
+ * Copyright 2018-2026 DITA (AM Consulting LLC)
+ * Licensed under the Apache License, Version 2.0
+ */
+
+import type { ProtectionModule, ProtectionEventCallback } from "../types";
+
+export interface TamperDetectionConfig {
+  /** Elements to protect (blank when tamper detected) */
+  protectedElements: HTMLElement[];
+  /** Root element to place sentinels in */
+  contentRoot: HTMLElement;
+  /** Number of sentinel elements to distribute (default: 3) */
+  sentinelCount?: number;
+  /** Action on detection */
+  action: "blank" | "scramble" | "callback";
+  /** Auto-restore after tampering stops (default: false) */
+  autoRestore?: boolean;
+  /** Restore delay in ms after tamper stops (default: 1000) */
+  restoreDelay?: number;
+  /**
+   * Additional CSS properties to watch on sentinels.
+   * Default watches: animation, transition, position, transform, opacity, visibility, display, filter.
+   * Screen grabbers typically inject animation/transition for capture timing.
+   */
+  watchProperties?: string[];
+  onEvent?: ProtectionEventCallback;
+}
+
+export class TamperDetection implements ProtectionModule {
+  private config: TamperDetectionConfig;
+  private sentinels: HTMLDivElement[] = [];
+  private observer: MutationObserver | null = null;
+  private isHacked = false;
+  private savedVisibility = new Map<HTMLElement, string>();
+  private restoreTimer: ReturnType<typeof setTimeout> | null = null;
+  private checkInterval: ReturnType<typeof setInterval> | null = null;
+
+  constructor(config: TamperDetectionConfig) {
+    this.config = {
+      sentinelCount: 3,
+      autoRestore: false,
+      restoreDelay: 1000,
+      watchProperties: [
+        "animation",
+        "transition",
+        "position",
+        "transform",
+        "opacity",
+        "visibility",
+        "display",
+        "filter",
+        "clip",
+        "clip-path",
+      ],
+      ...config,
+    };
+  }
+
+  /** Whether tampering has been detected */
+  get tampered(): boolean {
+    return this.isHacked;
+  }
+
+  activate(): void {
+    this.isHacked = false;
+    this.placeSentinels();
+    this.startObserver();
+    // Periodic check as backup (some injections bypass mutation observer)
+    this.checkInterval = setInterval(() => this.checkSentinels(), 2000);
+  }
+
+  deactivate(): void {
+    // Remove sentinels
+    for (const sentinel of this.sentinels) {
+      sentinel.remove();
+    }
+    this.sentinels = [];
+
+    // Disconnect observer
+    this.observer?.disconnect();
+    this.observer = null;
+
+    // Clear timers
+    if (this.restoreTimer !== null) {
+      clearTimeout(this.restoreTimer);
+      this.restoreTimer = null;
+    }
+    if (this.checkInterval !== null) {
+      clearInterval(this.checkInterval);
+      this.checkInterval = null;
+    }
+
+    // Restore visibility
+    this.restoreContent();
+    this.isHacked = false;
+  }
+
+  /**
+   * Place invisible sentinel elements throughout the content.
+   * Screen grabber extensions inject CSS on elements to control capture timing.
+   * If any sentinel gets a style attribute, we know something is tampering.
+   */
+  private placeSentinels(): void {
+    const count = this.config.sentinelCount ?? 3;
+    const root = this.config.contentRoot;
+    const children = Array.from(root.children);
+
+    for (let i = 0; i < count; i++) {
+      const sentinel = document.createElement("div");
+      // Make it invisible but present in the DOM
+      sentinel.style.cssText =
+        "width:0;height:0;overflow:hidden;position:absolute;pointer-events:none;";
+      sentinel.dataset.contentProtection = "sentinel";
+      sentinel.setAttribute("aria-hidden", "true");
+
+      // Distribute sentinels throughout the content
+      if (children.length > 0) {
+        const insertIndex = Math.floor((i / count) * children.length);
+        const refNode = children[Math.min(insertIndex, children.length - 1)];
+        root.insertBefore(sentinel, refNode);
+      } else {
+        root.appendChild(sentinel);
+      }
+
+      this.sentinels.push(sentinel);
+    }
+  }
+
+  /**
+   * Watch sentinels for any style attribute changes.
+   * Screen grabbers (GoFullPage, Nimbus Screenshot, Awesome Screenshot, etc.)
+   * inject CSS styles like animation, transition, or transform to time their captures.
+   */
+  private startObserver(): void {
+    this.observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        // Check if a sentinel was targeted
+        const target = mutation.target as HTMLElement;
+        const isSentinel =
+          this.sentinels.includes(target as HTMLDivElement) ||
+          (target.parentElement &&
+            this.sentinels.includes(target.parentElement as HTMLDivElement));
+
+        if (isSentinel && mutation.type === "attributes") {
+          if (mutation.attributeName === "style" || mutation.attributeName === "class") {
+            this.onTamperDetected("sentinel_style_injected");
+            return;
+          }
+        }
+
+        // Check if sentinel was removed from DOM
+        if (mutation.type === "childList") {
+          for (const removed of mutation.removedNodes) {
+            if (this.sentinels.includes(removed as HTMLDivElement)) {
+              this.onTamperDetected("sentinel_removed");
+              return;
+            }
+          }
+        }
+      }
+    });
+
+    // Observe the content root for child removal and sentinel attribute changes
+    this.observer.observe(this.config.contentRoot, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Also observe each sentinel specifically for attribute changes
+    for (const sentinel of this.sentinels) {
+      this.observer.observe(sentinel, {
+        attributes: true,
+        attributeFilter: ["style", "class"],
+      });
+    }
+  }
+
+  /**
+   * Periodic check for CSS injection that might bypass mutation observer.
+   * Checks computed styles on sentinels for suspicious properties.
+   */
+  private checkSentinels(): void {
+    for (const sentinel of this.sentinels) {
+      // Check if sentinel was removed
+      if (!sentinel.isConnected) {
+        this.onTamperDetected("sentinel_removed");
+        return;
+      }
+
+      // Check for inline style injection
+      if (this.hasSuspiciousStyles(sentinel)) {
+        this.onTamperDetected("sentinel_style_injected");
+        return;
+      }
+
+      // Check computed styles for injected CSS rules (class-based injection)
+      if (this.hasSuspiciousComputedStyles(sentinel)) {
+        this.onTamperDetected("computed_style_anomaly");
+        return;
+      }
+    }
+
+    // If previously hacked but sentinels are now clean, consider auto-restore
+    if (this.isHacked && this.config.autoRestore) {
+      this.scheduleRestore();
+    }
+  }
+
+  /** Check for directly injected inline styles */
+  private hasSuspiciousStyles(el: HTMLElement): boolean {
+    // Any style attribute beyond our initial setup is suspicious
+    const style = el.getAttribute("style") ?? "";
+    const ourStyle =
+      "width:0;height:0;overflow:hidden;position:absolute;pointer-events:none;";
+
+    // Normalize whitespace for comparison
+    const normalized = style.replace(/\s+/g, "").replace(/;$/, "");
+    const expected = ourStyle.replace(/\s+/g, "").replace(/;$/, "");
+
+    if (normalized !== expected && style.trim() !== "") {
+      // Check specific suspicious properties
+      if (
+        el.style.animation ||
+        el.style.transition ||
+        el.style.transform ||
+        el.style.filter ||
+        el.style.clip ||
+        el.style.clipPath
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Check computed styles for CSS rule injection (via class/id selectors) */
+  private hasSuspiciousComputedStyles(el: HTMLElement): boolean {
+    try {
+      const computed = getComputedStyle(el);
+      // These should all be "none" or empty for our sentinel
+      if (computed.animation && computed.animation !== "none") return true;
+      if (computed.transition && computed.transition !== "all 0s ease 0s" && computed.transition !== "none") return true;
+      if (computed.transform && computed.transform !== "none") return true;
+      if (computed.filter && computed.filter !== "none") return true;
+    } catch {
+      // ignore
+    }
+    return false;
+  }
+
+  private onTamperDetected(detail: string): void {
+    if (this.isHacked) return; // already handled
+
+    this.isHacked = true;
+    this.config.onEvent?.({
+      type: "tamper_detected",
+      timestamp: Date.now(),
+      detail,
+    });
+
+    switch (this.config.action) {
+      case "blank":
+        this.blankContent();
+        break;
+      case "scramble":
+        // Scramble is handled by text obfuscation module listening to tamper events
+        // We still blank as a fallback
+        this.blankContent();
+        break;
+      case "callback":
+        // onEvent already fired above
+        break;
+    }
+  }
+
+  private blankContent(): void {
+    for (const el of this.config.protectedElements) {
+      if (!this.savedVisibility.has(el)) {
+        this.savedVisibility.set(el, el.style.visibility);
+      }
+      el.style.setProperty("visibility", "hidden", "important");
+    }
+  }
+
+  private restoreContent(): void {
+    for (const [el, vis] of this.savedVisibility) {
+      el.style.visibility = vis;
+    }
+    this.savedVisibility.clear();
+  }
+
+  private scheduleRestore(): void {
+    if (this.restoreTimer !== null) return;
+    this.restoreTimer = setTimeout(() => {
+      this.restoreTimer = null;
+      // Only restore if sentinels are clean now
+      const stillTampered = this.sentinels.some(
+        (s) => !s.isConnected || this.hasSuspiciousStyles(s) || this.hasSuspiciousComputedStyles(s)
+      );
+      if (!stillTampered) {
+        this.isHacked = false;
+        this.restoreContent();
+        this.config.onEvent?.({
+          type: "tamper_detected",
+          timestamp: Date.now(),
+          detail: "restored",
+        });
+      }
+    }, this.config.restoreDelay ?? 1000);
+  }
+}

@@ -29,7 +29,7 @@ npm run demo
 Then open [http://localhost:3456/demo/](http://localhost:3456/demo/) in your browser.
 
 The demo simulates a book reader with:
-- **Left sidebar** — toggle each of the 18 modules on/off
+- **Left sidebar** — toggle each of the 19 modules on/off
 - **Center** — sample book content with active protections
 - **Right panel** — highlights & notes panel (also protected)
 - **Bottom** — live event log showing every blocked action
@@ -89,6 +89,7 @@ Each module can be used standalone or through the orchestrator.
 | **ContentExpiration** | Time-limited viewing sessions with optional extension |
 | **MediaProtection** | Protects `<audio>` and `<video>` elements — hides download button, blob URLs, blocks right-click, disables PiP |
 | **MediaStreamProtection** | Blocks MediaRecorder, AudioContext capture, and `captureStream()` on protected elements |
+| **TamperDetection** | Detects screen grabber CSS injection + DOM tampering via hidden sentinels; blanks content on detection |
 
 ## Standalone Module Usage
 
@@ -275,6 +276,26 @@ mediaStreamProtection: {
 ```
 
 These two modules are designed for EPUB3 media content rendered inside a web reader. The audio/video files end up as `<audio>`/`<video>` elements in the DOM — same context as the text, same protection surface.
+
+## Tamper Detection
+
+Detects screen grabber extensions (GoFullPage, Nimbus, Awesome Screenshot, etc.) that inject CSS styles onto DOM elements to time their captures. Places invisible sentinel elements throughout the content and watches for style injection via mutation observers and periodic computed-style checks.
+
+```typescript
+tamperDetection: {
+  protectedElements: [contentEl, annotationsPanel],
+  contentRoot: bodyEl,
+  sentinelCount: 3,              // distribute 3 sentinels in content
+  action: "blank",               // "blank" | "scramble" | "callback"
+  autoRestore: true,             // restore when tampering stops
+  restoreDelay: 2000,            // wait 2s before restoring
+}
+```
+
+Detects:
+- Inline style injection on sentinel elements (animation, transition, transform, filter, etc.)
+- Computed style anomalies from CSS rule injection (class/id-based)
+- Sentinel removal from DOM
 
 ## Screenshot Detection
 

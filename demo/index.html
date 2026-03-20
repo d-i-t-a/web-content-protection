@@ -385,6 +385,11 @@
       <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
     </div>
 
+    <div class="module-toggle" data-module="tamperDetection">
+      <label><input type="checkbox"> Tamper Detection <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
     <div style="margin-top: 20px;">
       <h2>Copy Mode</h2>
       <select id="copyMode" style="width: 100%; padding: 8px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; font-size: 13px;">
@@ -773,6 +778,16 @@
         blockMediaRecorder: true,
         blockAudioCapture: true,
         blockCaptureStream: true,
+      };
+    }
+    if (enabled.tamperDetection) {
+      config.tamperDetection = {
+        protectedElements: [bookContent, annotationsPanel],
+        contentRoot: bookContent,
+        sentinelCount: 3,
+        action: "blank",
+        autoRestore: true,
+        restoreDelay: 2000,
       };
     }
 
