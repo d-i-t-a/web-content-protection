@@ -385,6 +385,16 @@
       <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
     </div>
 
+    <div class="module-toggle" data-module="linkUrlHiding">
+      <label><input type="checkbox"> Link URL Hiding <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
+    <div class="module-toggle" data-module="browserEnforcement">
+      <label><input type="checkbox"> Browser Enforcement <span class="tag tag-existing">R2D2BC</span></label>
+      <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
+    </div>
+
     <div class="module-toggle" data-module="tamperDetection">
       <label><input type="checkbox"> Tamper Detection <span class="tag tag-existing">R2D2BC</span></label>
       <div class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></div>
@@ -454,6 +464,8 @@
         <p>For publishers who wanted to be generous, there was the attribution feature: any copied text would arrive with a trailing line — <em>"Copied from 'The Warden's Handbook' — © DITA Publishing."</em> The text carried its provenance with it, like a watermark on fine paper.</p>
 
         <blockquote>"You don't have to stop every thief. You just have to make stealing feel like stealing."</blockquote>
+
+        <p style="font-size:13px;color:#666;text-indent:0;">Further reading: <a href="https://www.w3.org/TR/epub-33/">EPUB 3.3 Specification</a> · <a href="https://readium.org/architecture/">Readium Architecture</a> · <a href="https://www.w3.org/publishing/">W3C Publishing</a> (hover these links with Link URL Hiding enabled — the status bar won't show the real URL)</p>
 
         <div style="text-align:center;margin:24px 0;">
           <img src="https://picsum.photos/seed/content-protection/400/200" alt="Sample illustration" style="max-width:100%;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
@@ -778,6 +790,17 @@
         blockMediaRecorder: true,
         blockAudioCapture: true,
         blockCaptureStream: true,
+      };
+    }
+    if (enabled.linkUrlHiding) {
+      config.linkUrlHiding = {
+        contentRoot: bookContent,
+      };
+    }
+    if (enabled.browserEnforcement) {
+      config.browserEnforcement = {
+        action: "warn",
+        minVersions: { chrome: 90, firefox: 88, safari: 14, edge: 90 },
       };
     }
     if (enabled.tamperDetection) {
