@@ -799,8 +799,8 @@
     }
     if (enabled.browserEnforcement) {
       config.browserEnforcement = {
-        action: "warn",
-        minVersions: { chrome: 90, firefox: 88, safari: 14, edge: 90 },
+        supportedBrowsers: ["chrome", "firefox", "safari", "edge", "opera"],
+        action: "callback",
       };
     }
     if (enabled.tamperDetection) {
