@@ -37,6 +37,7 @@ export class TextObfuscation implements ProtectionModule {
   private isHacked = false;
   private securityContainer: HTMLDivElement | null = null;
   private rafId: number | null = null;
+  private measureRange: Range | null = null;
   private excludeSet: Set<string>;
 
   constructor(config: TextObfuscationConfig) {
@@ -94,6 +95,10 @@ export class TextObfuscation implements ProtectionModule {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
+    if (this.measureRange) {
+      this.measureRange.detach();
+      this.measureRange = null;
+    }
   }
 
   /** Call when content changes (page turn, chapter navigation) */
@@ -134,17 +139,21 @@ export class TextObfuscation implements ProtectionModule {
       this.config.onEvent?.({ type: "tamper_detected", timestamp: Date.now() });
     }
 
+    // Cache container rect once per cycle instead of per-node
+    const containerRect = this.config.scrollContainer.getBoundingClientRect();
+    const pad = this.config.viewportPadding ?? 50;
+
     // Disconnect mutation observer during our own updates to prevent
     // the observer from re-scrambling text we're intentionally unscrambling
     this.mutationObserver?.disconnect();
     for (const rect of this.rects) {
-      this.toggleRect(rect, hacked);
+      this.toggleRect(rect, hacked, containerRect, pad);
     }
     this.reconnectMutationObserver();
   }
 
-  private toggleRect(rect: ObfuscationRect, hacked: boolean): void {
-    const outside = this.isOutsideViewport(rect);
+  private toggleRect(rect: ObfuscationRect, hacked: boolean, containerRect: DOMRect, pad: number): void {
+    const outside = this.isOutsideViewport(rect, containerRect, pad);
 
     // Unscramble: in viewport and not tampered
     if (rect.isObfuscated && !outside && !hacked && !this.isHacked) {
@@ -159,12 +168,7 @@ export class TextObfuscation implements ProtectionModule {
     }
   }
 
-  private isOutsideViewport(rect: ObfuscationRect): boolean {
-    const pad = this.config.viewportPadding ?? 50;
-
-    // Use fresh getBoundingClientRect for both the node and the container
-    // so we're comparing in the same coordinate system (viewport-relative)
-    const containerRect = this.config.scrollContainer.getBoundingClientRect();
+  private isOutsideViewport(rect: ObfuscationRect, containerRect: DOMRect, pad: number): boolean {
     const nodeRect = this.measureTextNode(rect.node);
 
     // Update stored positions for consistency
@@ -173,11 +177,11 @@ export class TextObfuscation implements ProtectionModule {
     rect.width = nodeRect.width;
     rect.height = nodeRect.height;
 
-    const lineHeight = this.getLineHeight(rect.node);
+    // Use a fixed buffer instead of per-node getComputedStyle (expensive)
+    const buffer = 20;
 
-    const isAbove = nodeRect.bottom < containerRect.top - lineHeight;
-    const isBelow = nodeRect.top > containerRect.bottom + lineHeight + pad;
-    // Wider horizontal margins for paginated content
+    const isAbove = nodeRect.bottom < containerRect.top - buffer;
+    const isBelow = nodeRect.top > containerRect.bottom + buffer + pad;
     const isLeft = nodeRect.right < containerRect.left - containerRect.width;
     const isRight = nodeRect.left > containerRect.right + containerRect.width;
 
@@ -234,11 +238,11 @@ export class TextObfuscation implements ProtectionModule {
 
   private measureTextNode(node: Node): DOMRect {
     try {
-      const range = document.createRange();
-      range.selectNode(node);
-      const rect = range.getBoundingClientRect();
-      range.detach();
-      return rect;
+      if (!this.measureRange) {
+        this.measureRange = document.createRange();
+      }
+      this.measureRange.selectNode(node);
+      return this.measureRange.getBoundingClientRect();
     } catch {
       return new DOMRect(0, 0, 0, 0);
     }
