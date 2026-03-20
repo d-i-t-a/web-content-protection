@@ -424,35 +424,35 @@
 
         <p>The email arrived at 3:47 AM, as the worst ones always do.</p>
 
-        <p>Elena Vasquez, Chief Technology Officer of Meridian Publishing, stared at the subject line on her phone: <em>"Your entire fall catalog is on a pirate site. All 240 titles."</em> She sat up in bed, heart pounding, and opened the message.</p>
+        <p>Aferdita Muriqi, Chief Technology Officer of DITA Publishing, stared at the subject line on her phone: <em>"Your entire fall catalog is on a pirate site. All 240 titles."</em> She sat up in bed, heart pounding, and opened the message.</p>
 
-        <p>It was true. Every single book Meridian had published in the last quarter — from the prize-winning literary fiction to the modest self-help guides — had been stripped of protection and uploaded in pristine EPUB format. The pirate site's download counter showed numbers that made her stomach turn.</p>
+        <p>It was true. Every single book DITA had published in the last quarter — from the prize-winning literary fiction to the modest self-help guides — had been stripped of protection and uploaded in pristine EPUB format. The pirate site's download counter showed numbers that made her stomach turn.</p>
 
-        <p>She called Marcus first. Marcus Chen, her head of engineering, had warned her this would happen.</p>
+        <p>She called Dion first. Dion Muriqi, her head of engineering, had warned her this would happen.</p>
 
         <p>"The web reader," he said, not even sounding surprised. "I told the board. You put a book in a browser, and the browser is the user's machine. It's their DOM. Their JavaScript console. Their clipboard."</p>
 
-        <p>"So what do we do?" Elena asked. "Go back to dedicated apps? Our readers will revolt."</p>
+        <p>"So what do we do?" Aferdita asked. "Go back to dedicated apps? Our readers will revolt."</p>
 
-        <p>Marcus was quiet for a moment. "No," he said. "We get smarter."</p>
+        <p>Dion was quiet for a moment. "No," he said. "We get smarter."</p>
 
         <div style="text-align:center;margin:32px 0;color:#888;font-size:24px;letter-spacing:8px;">* * *</div>
 
         <h3>Chapter 1: The Clipboard Wars</h3>
 
-        <p>The first vulnerability Marcus investigated was the most obvious: copy and paste. A reader could simply select all the text on a page, press Ctrl+C, and paste an entire chapter into an email. The browser was delighted to assist.</p>
+        <p>The first vulnerability Dion investigated was the most obvious: copy and paste. A reader could simply select all the text on a page, press Ctrl+C, and paste an entire chapter into an email. The browser was delighted to assist.</p>
 
-        <p>"The clipboard is not your friend," Marcus told his team on Monday morning. "It's a highway out of your application, and right now there are no toll booths."</p>
+        <p>"The clipboard is not your friend," Dion told his team on Monday morning. "It's a highway out of your application, and right now there are no toll booths."</p>
 
         <p>The solution was deceptively simple. Every <code>copy</code> event, every <code>cut</code> event, every keyboard shortcut that might invoke them — all intercepted. In block mode, the clipboard received nothing. In restrict mode, the reader could copy a sentence or two — enough to cite, enough to share a taste — but not a paragraph, never a page.</p>
 
-        <p>For publishers who wanted to be generous, there was the attribution feature: any copied text would arrive with a trailing line — <em>"Copied from 'The Warden's Handbook' — © Meridian Publishing."</em> The text carried its provenance with it, like a watermark on fine paper.</p>
+        <p>For publishers who wanted to be generous, there was the attribution feature: any copied text would arrive with a trailing line — <em>"Copied from 'The Warden's Handbook' — © DITA Publishing."</em> The text carried its provenance with it, like a watermark on fine paper.</p>
 
         <blockquote>"You don't have to stop every thief. You just have to make stealing feel like stealing."</blockquote>
 
         <div style="text-align:center;margin:24px 0;">
           <img src="https://picsum.photos/seed/content-protection/400/200" alt="Sample illustration" style="max-width:100%;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-          <p style="font-size:13px;color:#888;text-indent:0;margin-top:8px;">Fig 1. — The Meridian offices at dusk (try right-clicking or dragging this image)</p>
+          <p style="font-size:13px;color:#888;text-indent:0;margin-top:8px;">Fig 1. — The DITA offices at dusk (try right-clicking or dragging this image)</p>
         </div>
 
         <div style="background:#f0f0f0;border-radius:8px;padding:16px;margin:24px 0;">
@@ -467,11 +467,11 @@
 
         <p>The second attack vector was more insidious. A technically inclined reader could open the developer tools and simply read the DOM. Every word of the book was right there in the HTML.</p>
 
-        <p>"Imagine you're reading a physical book," Marcus explained to Elena. "You can see the page in front of you. But imagine that every page you're <em>not</em> looking at is written in cipher. The moment you turn to it, it decrypts. The moment you turn away, it scrambles again."</p>
+        <p>"Imagine you're reading a physical book," Dion explained to Aferdita. "You can see the page in front of you. But imagine that every page you're <em>not</em> looking at is written in cipher. The moment you turn to it, it decrypts. The moment you turn away, it scrambles again."</p>
 
-        <p>"That's insane," Elena said. "That's brilliant."</p>
+        <p>"That's insane," Aferdita said. "That's brilliant."</p>
 
-        <p>"That's text obfuscation," Marcus said.</p>
+        <p>"That's text obfuscation," Dion said.</p>
 
         <p>The system tracked scroll position with surgical precision. Text within the visible viewport was presented in its original form. But text above or below — text that had scrolled out of sight — was shuffled into nonsense. The characters were all there, rearranged within each word, producing something that looked almost like language but was meaningless.</p>
 
@@ -486,13 +486,13 @@
 
         <p>The third generation of attacks didn't come from humans at all. They came from scripts.</p>
 
-        <p>Marcus had been monitoring the server logs when he noticed the pattern: a single user account loading every page of every book, one after another, at precisely three-second intervals. No human reads that fast. No human reads twenty-six books in a single afternoon.</p>
+        <p>Dion had been monitoring the server logs when he noticed the pattern: a single user account loading every page of every book, one after another, at precisely three-second intervals. No human reads that fast. No human reads twenty-six books in a single afternoon.</p>
 
-        <p>"Puppeteer," said Anika, the junior security engineer. "Or Playwright. They're using a headless browser to automate page turns and scrape the text."</p>
+        <p>"Puppeteer," said Aria, the junior security engineer. "Or Playwright. They're using a headless browser to automate page turns and scrape the text."</p>
 
-        <p>She showed Marcus the detection cascade: WebDriver flags, headless indicators, automation-framework globals, missing browser plugins, screen dimension anomalies. Each check on its own might produce a false positive. Together, they formed a reliable signature.</p>
+        <p>She showed Dion the detection cascade: WebDriver flags, headless indicators, automation-framework globals, missing browser plugins, screen dimension anomalies. Each check on its own might produce a false positive. Together, they formed a reliable signature.</p>
 
-        <p>"And we re-check every five seconds," Anika added, "because a clever attacker might inject the automation framework <em>after</em> page load."</p>
+        <p>"And we re-check every five seconds," Aria added, "because a clever attacker might inject the automation framework <em>after</em> page load."</p>
 
         <div style="background:#f0f0f0;border-radius:8px;padding:16px;margin:24px 0;">
           <p style="text-indent:0;font-size:13px;color:#666;margin-bottom:8px;font-family:system-ui,sans-serif;font-weight:600;">Video Supplement — Inside the Server Room</p>
@@ -504,7 +504,7 @@
 
         <h3>Chapter 4: The Invisible Ink</h3>
 
-        <p>Despite all their defenses, Marcus knew that some content would eventually escape. A determined reader with a camera pointed at their screen could capture any page.</p>
+        <p>Despite all their defenses, Dion knew that some content would eventually escape. A determined reader with a camera pointed at their screen could capture any page.</p>
 
         <p>"If we can't prevent all leaks," he told the team, "we need to be able to trace them."</p>
 
@@ -512,17 +512,17 @@
 
         <p>The second level was far more subtle. Zero-width Unicode characters — invisible characters that render as nothing on screen — were injected into the content at chosen intervals, encoding the reader's identity in binary. If someone copied text and pasted it anywhere, the zero-width characters traveled with it, invisible and indestructible.</p>
 
-        <p>"It's like invisible ink," Elena said when Marcus demonstrated it.</p>
+        <p>"It's like invisible ink," Aferdita said when Dion demonstrated it.</p>
 
-        <p>"It's better than invisible ink," Marcus replied. "Invisible ink can be washed away. These characters survive copy, paste, email forwarding, even OCR."</p>
+        <p>"It's better than invisible ink," Dion replied. "Invisible ink can be washed away. These characters survive copy, paste, email forwarding, even OCR."</p>
 
         <h3>Chapter 5: The Voice in the Wire</h3>
 
         <p>The vulnerability report that arrived in April caught everyone off guard. A graduate student in Berlin had discovered that the Web Speech API could be used to extract book content. A script could feed each page into <code>speechSynthesis.speak()</code>, record the output, and run it through speech-to-text to reconstruct the book.</p>
 
-        <p>"That's three transformations," Anika said, impressed despite herself. "Text to speech, speech to recording, recording back to text. Who even thinks of that?"</p>
+        <p>"That's three transformations," Aria said, impressed despite herself. "Text to speech, speech to recording, recording back to text. Who even thinks of that?"</p>
 
-        <p>"Graduate students with too much time," Marcus said. "Block it."</p>
+        <p>"Graduate students with too much time," Dion said. "Block it."</p>
 
         <p>The speech synthesis module intercepted the browser's <code>speak()</code> method at the prototype level. In block mode, calls were silently swallowed. In restrict mode, utterances were truncated — enough for accessibility, not enough to extract a full page.</p>
 
@@ -532,7 +532,7 @@
 
         <p>"We have a problem with our free preview program," said the VP of Marketing. "We give readers 24 hours. But 12% of them leave their tabs open indefinitely, reading the entire book without purchasing."</p>
 
-        <p>Marcus smiled. He already had the solution.</p>
+        <p>Dion smiled. He already had the solution.</p>
 
         <p>The content expiration module started a timer when a reading session began. As the end approached, a warning fired. When time expired, the content blanked — visibility hidden, the words vanishing like writing in sand. For paid readers, the session could be extended. For preview readers, extensions were limited.</p>
 
@@ -543,13 +543,13 @@
 
         <h3>Epilogue</h3>
 
-        <p>Six months after deploying the full suite, Elena pulled up the piracy monitoring dashboard. The numbers had changed dramatically. Not to zero — they would never reach zero. But the casual piracy, the opportunistic scraping, the automated extraction — all of it had dropped by over 80%.</p>
+        <p>Six months after deploying the full suite, Aferdita pulled up the piracy monitoring dashboard. The numbers had changed dramatically. Not to zero — they would never reach zero. But the casual piracy, the opportunistic scraping, the automated extraction — all of it had dropped by over 80%.</p>
 
-        <p>"We didn't build a fortress," Marcus said during his presentation to the board. "We built a fence. A good fence. The kind that makes good neighbors."</p>
+        <p>"We didn't build a fortress," Dion said during his presentation to the board. "We built a fence. A good fence. The kind that makes good neighbors."</p>
 
         <p>"Sixteen modules. Zero required dependencies. Framework-agnostic. Tree-shakable. Drop it into any web reader in the world."</p>
 
-        <p>Elena watched the board members' faces and saw something she hadn't seen in a long time: confidence. Not the false confidence of believing a problem was solved, but the quiet confidence of knowing it was managed.</p>
+        <p>Aferdita watched the board members' faces and saw something she hadn't seen in a long time: confidence. Not the false confidence of believing a problem was solved, but the quiet confidence of knowing it was managed.</p>
 
         <p>That was enough. That had always been enough.</p>
 
@@ -560,7 +560,7 @@
         <h3>Highlights &amp; Notes</h3>
         <div class="annotation-item">
           <div class="highlight-text">You don't have to stop every thief. You just have to make stealing feel like stealing.</div>
-          <div class="note">Ch.1 — Marcus's key insight on deterrence vs prevention</div>
+          <div class="note">Ch.1 — Dion's key insight on deterrence vs prevention</div>
         </div>
         <div class="annotation-item">
           <div class="highlight-text">The clipboard is not your friend. It's a highway out of your application.</div>
