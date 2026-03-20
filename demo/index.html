@@ -267,6 +267,11 @@
 
     .log-empty { color: #484f58; font-style: italic; }
 
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
     /* Status indicator */
     .status {
       display: flex;
@@ -398,6 +403,8 @@
       <button id="btnTestPrint">Test: Ctrl+P</button>
       <button id="btnTestSelect">Test: Select All</button>
       <button id="btnDumpText">Test: Dump innerText</button>
+      <button id="btnExtendSession" style="display:none;background:#1a7f37;border-color:#238636;color:#fff;">Extend Session</button>
+      <span id="sessionTimer" style="display:none;font-size:11px;color:#ffa657;font-family:monospace;"></span>
     </div>
 
     <div class="reader-container">
@@ -591,6 +598,33 @@
 
   let protection = null;
   let isActive = false;
+  let sessionTimerInterval = null;
+
+  const btnExtend = document.getElementById("btnExtendSession");
+  const sessionTimerEl = document.getElementById("sessionTimer");
+
+  function updateSessionTimer() {
+    if (!protection?.contentExpiration) {
+      btnExtend.style.display = "none";
+      sessionTimerEl.style.display = "none";
+      if (sessionTimerInterval) { clearInterval(sessionTimerInterval); sessionTimerInterval = null; }
+      return;
+    }
+    btnExtend.style.display = "";
+    sessionTimerEl.style.display = "";
+    const remaining = protection.contentExpiration.remainingMs;
+    const secs = Math.ceil(remaining / 1000);
+    if (secs <= 0) {
+      sessionTimerEl.textContent = "EXPIRED";
+      sessionTimerEl.style.color = "#f85149";
+    } else if (secs <= 30) {
+      sessionTimerEl.textContent = `${secs}s remaining`;
+      sessionTimerEl.style.color = "#f85149";
+    } else {
+      sessionTimerEl.textContent = `${secs}s remaining`;
+      sessionTimerEl.style.color = "#ffa657";
+    }
+  }
 
   function getEnabledModules() {
     const modules = {};
@@ -711,8 +745,14 @@
         allowExtension: true,
         maxExtensions: 3,
         extensionDuration: 60000,
-        onWarning: (ms) => logEvent({ type: "session_warning", timestamp: Date.now(), detail: `Expires in ${Math.round(ms/1000)}s — click Activate to extend` }),
-        onExpired: () => logEvent({ type: "session_expired", timestamp: Date.now(), detail: "Session expired — content blanked" }),
+        onWarning: (ms) => {
+          logEvent({ type: "session_warning", timestamp: Date.now(), detail: `Expires in ${Math.round(ms/1000)}s` });
+          btnExtend.style.animation = "pulse 1s infinite";
+        },
+        onExpired: () => {
+          logEvent({ type: "session_expired", timestamp: Date.now(), detail: "Session expired — click Extend Session to continue" });
+          updateSessionTimer();
+        },
       };
     }
 
@@ -741,6 +781,7 @@
 
   async function activate() {
     if (protection) protection.deactivate();
+    if (sessionTimerInterval) { clearInterval(sessionTimerInterval); sessionTimerInterval = null; }
     const config = buildConfig();
     protection = new ContentProtection(config);
     await protection.activate();
@@ -748,6 +789,15 @@
     statusDot.classList.add("active");
     statusText.textContent = `Active (${Object.keys(config).filter(k => k !== "onEvent").length} modules)`;
     logEvent({ type: "system", timestamp: Date.now(), detail: "Protection activated" });
+
+    // Start session timer if content expiration is active
+    if (protection.contentExpiration) {
+      sessionTimerInterval = setInterval(updateSessionTimer, 1000);
+      updateSessionTimer();
+    } else {
+      btnExtend.style.display = "none";
+      sessionTimerEl.style.display = "none";
+    }
   }
 
   function deactivate() {
@@ -755,15 +805,30 @@
       protection.deactivate();
       protection = null;
     }
+    if (sessionTimerInterval) { clearInterval(sessionTimerInterval); sessionTimerInterval = null; }
     isActive = false;
     statusDot.classList.remove("active");
     statusText.textContent = "Inactive";
+    btnExtend.style.display = "none";
+    sessionTimerEl.style.display = "none";
     logEvent({ type: "system", timestamp: Date.now(), detail: "Protection deactivated" });
   }
 
   // Toolbar buttons
   document.getElementById("btnActivate").addEventListener("click", activate);
   document.getElementById("btnDeactivate").addEventListener("click", deactivate);
+  btnExtend.addEventListener("click", () => {
+    if (protection?.contentExpiration) {
+      const extended = protection.contentExpiration.extend();
+      if (extended) {
+        btnExtend.style.animation = "";
+        logEvent({ type: "system", timestamp: Date.now(), detail: "Session extended" });
+        updateSessionTimer();
+      } else {
+        logEvent({ type: "system", timestamp: Date.now(), detail: "No extensions remaining" });
+      }
+    }
+  });
   document.getElementById("btnClearLog").addEventListener("click", () => {
     eventLog.innerHTML = '<div class="log-empty">Protection events will appear here...</div>';
   });
