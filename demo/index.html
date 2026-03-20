@@ -829,9 +829,25 @@
     logEvent({ type: "system", timestamp: Date.now(), detail: "Protection deactivated" });
   }
 
+  function toggleAllModules(on) {
+    document.querySelectorAll(".module-toggle").forEach((toggle) => {
+      const labelCb = toggle.querySelector("label input");
+      const switchCb = toggle.querySelector(".toggle-switch input");
+      labelCb.checked = on;
+      switchCb.checked = on;
+      toggle.classList.toggle("active", on);
+    });
+  }
+
   // Toolbar buttons
-  document.getElementById("btnActivate").addEventListener("click", activate);
-  document.getElementById("btnDeactivate").addEventListener("click", deactivate);
+  document.getElementById("btnActivate").addEventListener("click", () => {
+    toggleAllModules(true);
+    activate();
+  });
+  document.getElementById("btnDeactivate").addEventListener("click", () => {
+    deactivate();
+    toggleAllModules(false);
+  });
   btnExtend.addEventListener("click", () => {
     if (protection?.contentExpiration) {
       const extended = protection.contentExpiration.extend();
