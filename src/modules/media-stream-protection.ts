@@ -36,6 +36,8 @@ export interface MediaStreamProtectionConfig {
   blockAudioCapture?: boolean;
   /** Intercept captureStream() on canvas/media elements */
   blockCaptureStream?: boolean;
+  /** Intercept getDisplayMedia() — blocks screen recording/capture API */
+  blockDisplayCapture?: boolean;
   onEvent?: ProtectionEventCallback;
 }
 
@@ -52,6 +54,7 @@ export class MediaStreamProtection implements ProtectionModule {
   private originalCanvasCaptureStream:
     | typeof HTMLCanvasElement.prototype.captureStream
     | null = null;
+  private originalGetDisplayMedia: typeof navigator.mediaDevices.getDisplayMedia | null = null;
 
   constructor(config: MediaStreamProtectionConfig) {
     this.config = {
@@ -61,6 +64,7 @@ export class MediaStreamProtection implements ProtectionModule {
       blockMediaRecorder: true,
       blockAudioCapture: true,
       blockCaptureStream: true,
+      blockDisplayCapture: true,
       ...config,
     };
   }
@@ -74,6 +78,9 @@ export class MediaStreamProtection implements ProtectionModule {
     }
     if (this.config.blockCaptureStream) {
       this.interceptCaptureStream();
+    }
+    if (this.config.blockDisplayCapture) {
+      this.interceptGetDisplayMedia();
     }
   }
 
@@ -102,6 +109,12 @@ export class MediaStreamProtection implements ProtectionModule {
     if (this.originalCanvasCaptureStream) {
       HTMLCanvasElement.prototype.captureStream = this.originalCanvasCaptureStream;
       this.originalCanvasCaptureStream = null;
+    }
+
+    // Restore getDisplayMedia
+    if (this.originalGetDisplayMedia && navigator.mediaDevices) {
+      navigator.mediaDevices.getDisplayMedia = this.originalGetDisplayMedia;
+      this.originalGetDisplayMedia = null;
     }
   }
 
@@ -241,6 +254,37 @@ export class MediaStreamProtection implements ProtectionModule {
         return origCanvasCapture.call(this, frameRequestRate!);
       };
     }
+  }
+
+  /**
+   * Intercept navigator.mediaDevices.getDisplayMedia().
+   * This is the Screen Capture API — used by all modern screen recording tools,
+   * browser extensions, and web-based capture services.
+   */
+  private interceptGetDisplayMedia(): void {
+    if (!navigator.mediaDevices?.getDisplayMedia) return;
+
+    this.originalGetDisplayMedia = navigator.mediaDevices.getDisplayMedia.bind(
+      navigator.mediaDevices
+    );
+    const self = this;
+
+    navigator.mediaDevices.getDisplayMedia = function (
+      constraints?: DisplayMediaStreamOptions
+    ): Promise<MediaStream> {
+      self.config.onEvent?.({
+        type: "media_stream_blocked",
+        timestamp: Date.now(),
+        detail: "getDisplayMedia blocked — screen capture attempt",
+      });
+
+      return Promise.reject(
+        new DOMException(
+          "Failed to execute 'getDisplayMedia': Screen capture is not permitted on this page.",
+          "NotAllowedError"
+        )
+      );
+    };
   }
 
   /** Check if an element is within a protected content root */

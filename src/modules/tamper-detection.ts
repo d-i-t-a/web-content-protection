@@ -207,29 +207,20 @@ export class TamperDetection implements ProtectionModule {
     }
   }
 
-  /** Check for directly injected inline styles */
+  /** Check for directly injected inline styles beyond what we set */
   private hasSuspiciousStyles(el: HTMLElement): boolean {
-    // Any style attribute beyond our initial setup is suspicious
-    const style = el.getAttribute("style") ?? "";
-    const ourStyle =
-      "width:0;height:0;overflow:hidden;position:absolute;pointer-events:none;";
-
-    // Normalize whitespace for comparison
-    const normalized = style.replace(/\s+/g, "").replace(/;$/, "");
-    const expected = ourStyle.replace(/\s+/g, "").replace(/;$/, "");
-
-    if (normalized !== expected && style.trim() !== "") {
-      // Check specific suspicious properties
-      if (
-        el.style.animation ||
-        el.style.transition ||
-        el.style.transform ||
-        el.style.filter ||
-        el.style.clip ||
-        el.style.clipPath
-      ) {
-        return true;
-      }
+    // Only flag properties that screen grabbers inject — NOT properties we set ourselves
+    // We set: width, height, overflow, position, pointer-events
+    // Screen grabbers inject: animation, transition, transform, filter, clip, opacity changes
+    if (
+      el.style.animation ||
+      el.style.transition ||
+      el.style.transform ||
+      el.style.filter ||
+      el.style.clip ||
+      el.style.clipPath
+    ) {
+      return true;
     }
     return false;
   }
@@ -238,9 +229,9 @@ export class TamperDetection implements ProtectionModule {
   private hasSuspiciousComputedStyles(el: HTMLElement): boolean {
     try {
       const computed = getComputedStyle(el);
-      // These should all be "none" or empty for our sentinel
-      if (computed.animation && computed.animation !== "none") return true;
-      if (computed.transition && computed.transition !== "all 0s ease 0s" && computed.transition !== "none") return true;
+      // Only check properties that screen grabbers inject
+      // Browsers have various defaults for transition — accept all common defaults
+      if (computed.animationName && computed.animationName !== "none") return true;
       if (computed.transform && computed.transform !== "none") return true;
       if (computed.filter && computed.filter !== "none") return true;
     } catch {
