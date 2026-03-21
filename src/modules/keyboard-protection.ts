@@ -4,7 +4,13 @@
  */
 
 import type { ProtectionModule, CommonTargets, ProtectionEventCallback } from "../types";
-import { type ListenerRecord, addListenerSafe, removeAllListeners, collectTargets, isMac } from "../utils";
+import {
+  type ListenerRecord,
+  addListenerSafe,
+  removeAllListeners,
+  collectTargets,
+  isMac,
+} from "../utils";
 
 export interface KeyboardProtectionConfig extends CommonTargets {
   /** Block Ctrl+S / Cmd+S (save page) — default true */
@@ -49,7 +55,7 @@ export class KeyboardProtection implements ProtectionModule {
     const targets = collectTargets(
       this.config.contentElement,
       this.config.additionalElements,
-      this.config.contentIframes
+      this.config.contentIframes,
     );
 
     for (const target of targets) {

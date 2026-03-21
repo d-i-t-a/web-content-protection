@@ -68,7 +68,9 @@ export class LinkUrlHiding implements ProtectionModule {
       // Navigate on click using stored value
       const handler = (ev: Event) => {
         ev.preventDefault();
-        const resolvedHref = (ev.currentTarget as HTMLAnchorElement).getAttribute("data-href-resolved");
+        const resolvedHref = (ev.currentTarget as HTMLAnchorElement).getAttribute(
+          "data-href-resolved",
+        );
         if (resolvedHref) {
           window.open(resolvedHref, anchor.getAttribute("target") || "_blank");
         }

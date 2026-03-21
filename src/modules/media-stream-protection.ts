@@ -51,9 +51,8 @@ export class MediaStreamProtection implements ProtectionModule {
     | typeof AudioContext.prototype.createMediaElementSource
     | null = null;
   private originalCaptureStream: typeof HTMLMediaElement.prototype.captureStream | null = null;
-  private originalCanvasCaptureStream:
-    | typeof HTMLCanvasElement.prototype.captureStream
-    | null = null;
+  private originalCanvasCaptureStream: typeof HTMLCanvasElement.prototype.captureStream | null =
+    null;
   private originalGetDisplayMedia: typeof navigator.mediaDevices.getDisplayMedia | null = null;
 
   constructor(config: MediaStreamProtectionConfig) {
@@ -127,6 +126,7 @@ export class MediaStreamProtection implements ProtectionModule {
     if (typeof MediaRecorder === "undefined") return;
 
     this.originalMediaRecorder = MediaRecorder;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     // Replace with a proxy that blocks recording of protected streams
@@ -141,7 +141,7 @@ export class MediaStreamProtection implements ProtectionModule {
         // Throw a DOMException similar to what browsers throw for DRM content
         throw new DOMException(
           "Failed to construct 'MediaRecorder': The MediaRecorder failed to start because the stream is protected.",
-          "NotSupportedError"
+          "NotSupportedError",
         );
       }
 
@@ -159,15 +159,15 @@ export class MediaStreamProtection implements ProtectionModule {
   private interceptAudioCapture(): void {
     if (typeof AudioContext === "undefined") return;
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     // Block createMediaElementSource for protected elements
-    this.originalCreateMediaElementSource =
-      AudioContext.prototype.createMediaElementSource;
+    this.originalCreateMediaElementSource = AudioContext.prototype.createMediaElementSource;
     const origCreateElement = this.originalCreateMediaElementSource;
 
     AudioContext.prototype.createMediaElementSource = function (
-      mediaElement: HTMLMediaElement
+      mediaElement: HTMLMediaElement,
     ): MediaElementAudioSourceNode {
       // Check if this element is within a protected root
       if (self.isProtectedElement(mediaElement)) {
@@ -178,19 +178,18 @@ export class MediaStreamProtection implements ProtectionModule {
         });
         throw new DOMException(
           "Failed to execute 'createMediaElementSource': The media element is protected.",
-          "InvalidStateError"
+          "InvalidStateError",
         );
       }
       return origCreateElement.call(this, mediaElement);
     };
 
     // Block createMediaStreamSource (captures from streams)
-    this.originalCreateMediaStreamSource =
-      AudioContext.prototype.createMediaStreamSource;
+    this.originalCreateMediaStreamSource = AudioContext.prototype.createMediaStreamSource;
     const origCreateStream = this.originalCreateMediaStreamSource;
 
     AudioContext.prototype.createMediaStreamSource = function (
-      stream: MediaStream
+      stream: MediaStream,
     ): MediaStreamAudioSourceNode {
       self.config.onEvent?.({
         type: "media_stream_blocked",
@@ -208,6 +207,7 @@ export class MediaStreamProtection implements ProtectionModule {
    * Prevents creating a MediaStream from protected content.
    */
   private interceptCaptureStream(): void {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     // HTMLMediaElement.captureStream()
@@ -224,7 +224,7 @@ export class MediaStreamProtection implements ProtectionModule {
           });
           throw new DOMException(
             "Failed to execute 'captureStream': The element is protected.",
-            "NotSupportedError"
+            "NotSupportedError",
           );
         }
         return origCapture.call(this);
@@ -237,7 +237,7 @@ export class MediaStreamProtection implements ProtectionModule {
       const origCanvasCapture = this.originalCanvasCaptureStream;
 
       HTMLCanvasElement.prototype.captureStream = function (
-        frameRequestRate?: number
+        frameRequestRate?: number,
       ): MediaStream {
         // Check if canvas is within protected root
         if (self.isProtectedElement(this)) {
@@ -248,7 +248,7 @@ export class MediaStreamProtection implements ProtectionModule {
           });
           throw new DOMException(
             "Failed to execute 'captureStream': The canvas is protected.",
-            "NotSupportedError"
+            "NotSupportedError",
           );
         }
         return origCanvasCapture.call(this, frameRequestRate!);
@@ -265,12 +265,13 @@ export class MediaStreamProtection implements ProtectionModule {
     if (!navigator.mediaDevices?.getDisplayMedia) return;
 
     this.originalGetDisplayMedia = navigator.mediaDevices.getDisplayMedia.bind(
-      navigator.mediaDevices
+      navigator.mediaDevices,
     );
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     navigator.mediaDevices.getDisplayMedia = function (
-      constraints?: DisplayMediaStreamOptions
+      _constraints?: DisplayMediaStreamOptions,
     ): Promise<MediaStream> {
       self.config.onEvent?.({
         type: "media_stream_blocked",
@@ -281,8 +282,8 @@ export class MediaStreamProtection implements ProtectionModule {
       return Promise.reject(
         new DOMException(
           "Failed to execute 'getDisplayMedia': Screen capture is not permitted on this page.",
-          "NotAllowedError"
-        )
+          "NotAllowedError",
+        ),
       );
     };
   }

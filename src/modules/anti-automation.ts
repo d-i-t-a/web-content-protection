@@ -52,10 +52,7 @@ export class AntiAutomation implements ProtectionModule {
     this.runDetection();
 
     if (this.config.recheckInterval && this.config.recheckInterval > 0) {
-      this.intervalId = setInterval(
-        () => this.runDetection(),
-        this.config.recheckInterval
-      );
+      this.intervalId = setInterval(() => this.runDetection(), this.config.recheckInterval);
     }
   }
 
@@ -148,10 +145,7 @@ export class AntiAutomation implements ProtectionModule {
       if ((window as any).__nightmare) return true;
 
       // Chrome headless lacks chrome.runtime
-      if (
-        /Chrome/.test(navigator.userAgent) &&
-        !(window as any).chrome?.runtime
-      ) {
+      if (/Chrome/.test(navigator.userAgent) && !(window as any).chrome?.runtime) {
         // Could be headless — but also could be an iframe, so check more
         if (navigator.languages?.length === 0) return true;
       }

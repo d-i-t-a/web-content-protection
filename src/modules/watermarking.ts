@@ -148,15 +148,22 @@ export class Watermarking implements ProtectionModule {
    */
   private encodeFingerprint(userId: string): string {
     const ZERO = "\u200B"; // zero-width space
-    const ONE = "\u200C";  // zero-width non-joiner
-    const SEP = "\u200D";  // zero-width joiner as separator
+    const ONE = "\u200C"; // zero-width non-joiner
+    const SEP = "\u200D"; // zero-width joiner as separator
 
     let binary = "";
     for (let i = 0; i < userId.length; i++) {
       binary += userId.charCodeAt(i).toString(2).padStart(8, "0");
     }
 
-    return SEP + binary.split("").map((b) => (b === "0" ? ZERO : ONE)).join("") + SEP;
+    return (
+      SEP +
+      binary
+        .split("")
+        .map((b) => (b === "0" ? ZERO : ONE))
+        .join("") +
+      SEP
+    );
   }
 
   /**

@@ -3,25 +3,37 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-import type { ProtectionModule, ProtectionEvent, ProtectionEventCallback, CommonTargets } from "./types";
+import type { ProtectionModule, ProtectionEvent, ProtectionEventCallback } from "./types";
 import { DragPrevention, type DragPreventionConfig } from "./modules/drag-prevention";
 import { PrintProtection, type PrintProtectionConfig } from "./modules/print-protection";
 import { CopyProtection, type CopyProtectionConfig } from "./modules/copy-protection";
-import { ContextMenuProtection, type ContextMenuProtectionConfig } from "./modules/context-menu-protection";
+import {
+  ContextMenuProtection,
+  type ContextMenuProtectionConfig,
+} from "./modules/context-menu-protection";
 import { KeyboardProtection, type KeyboardProtectionConfig } from "./modules/keyboard-protection";
 import { DevToolsDetection, type DevToolsDetectionConfig } from "./modules/devtools-detection";
 import { TextObfuscation, type TextObfuscationConfig } from "./modules/text-obfuscation";
 import { LinkUrlHiding, type LinkUrlHidingConfig } from "./modules/link-url-hiding";
 import { BrowserEnforcement, type BrowserEnforcementConfig } from "./modules/browser-enforcement";
-import { ScreenshotDetection, type ScreenshotDetectionConfig } from "./modules/screenshot-detection";
+import {
+  ScreenshotDetection,
+  type ScreenshotDetectionConfig,
+} from "./modules/screenshot-detection";
 import { Watermarking, type WatermarkingConfig } from "./modules/watermarking";
 import { SelectionLimiting, type SelectionLimitingConfig } from "./modules/selection-limiting";
 import { ImageProtection, type ImageProtectionConfig } from "./modules/image-protection";
 import { AntiAutomation, type AntiAutomationConfig } from "./modules/anti-automation";
-import { SpeechSynthesisBlocking, type SpeechSynthesisBlockingConfig } from "./modules/speech-synthesis-blocking";
+import {
+  SpeechSynthesisBlocking,
+  type SpeechSynthesisBlockingConfig,
+} from "./modules/speech-synthesis-blocking";
 import { ContentExpiration, type ContentExpirationConfig } from "./modules/content-expiration";
 import { MediaProtection, type MediaProtectionConfig } from "./modules/media-protection";
-import { MediaStreamProtection, type MediaStreamProtectionConfig } from "./modules/media-stream-protection";
+import {
+  MediaStreamProtection,
+  type MediaStreamProtectionConfig,
+} from "./modules/media-stream-protection";
 import { TamperDetection, type TamperDetectionConfig } from "./modules/tamper-detection";
 
 export interface ContentProtectionConfig {
@@ -94,49 +106,82 @@ export class ContentProtection {
       this.modules.set("copy", new CopyProtection({ ...this.config.copyProtection, onEvent }));
     }
     if (this.config.contextMenuProtection) {
-      this.modules.set("contextMenu", new ContextMenuProtection({ ...this.config.contextMenuProtection, onEvent }));
+      this.modules.set(
+        "contextMenu",
+        new ContextMenuProtection({ ...this.config.contextMenuProtection, onEvent }),
+      );
     }
     if (this.config.keyboardProtection) {
-      this.modules.set("keyboard", new KeyboardProtection({ ...this.config.keyboardProtection, onEvent }));
+      this.modules.set(
+        "keyboard",
+        new KeyboardProtection({ ...this.config.keyboardProtection, onEvent }),
+      );
     }
     if (this.config.devToolsDetection) {
-      this.modules.set("devtools", new DevToolsDetection({ ...this.config.devToolsDetection, onEvent }));
+      this.modules.set(
+        "devtools",
+        new DevToolsDetection({ ...this.config.devToolsDetection, onEvent }),
+      );
     }
     if (this.config.textObfuscation) {
-      this.modules.set("obfuscation", new TextObfuscation({ ...this.config.textObfuscation, onEvent }));
+      this.modules.set(
+        "obfuscation",
+        new TextObfuscation({ ...this.config.textObfuscation, onEvent }),
+      );
     }
     if (this.config.linkUrlHiding) {
       this.modules.set("linkHiding", new LinkUrlHiding(this.config.linkUrlHiding));
     }
     if (this.config.browserEnforcement) {
-      this.modules.set("browser", new BrowserEnforcement({ ...this.config.browserEnforcement, onEvent }));
+      this.modules.set(
+        "browser",
+        new BrowserEnforcement({ ...this.config.browserEnforcement, onEvent }),
+      );
     }
     if (this.config.screenshotDetection) {
-      this.modules.set("screenshot", new ScreenshotDetection({ ...this.config.screenshotDetection, onEvent }));
+      this.modules.set(
+        "screenshot",
+        new ScreenshotDetection({ ...this.config.screenshotDetection, onEvent }),
+      );
     }
     if (this.config.watermarking) {
       this.modules.set("watermark", new Watermarking(this.config.watermarking));
     }
     if (this.config.selectionLimiting) {
-      this.modules.set("selection", new SelectionLimiting({ ...this.config.selectionLimiting, onEvent }));
+      this.modules.set(
+        "selection",
+        new SelectionLimiting({ ...this.config.selectionLimiting, onEvent }),
+      );
     }
     if (this.config.imageProtection) {
       this.modules.set("image", new ImageProtection({ ...this.config.imageProtection, onEvent }));
     }
     if (this.config.antiAutomation) {
-      this.modules.set("automation", new AntiAutomation({ ...this.config.antiAutomation, onEvent }));
+      this.modules.set(
+        "automation",
+        new AntiAutomation({ ...this.config.antiAutomation, onEvent }),
+      );
     }
     if (this.config.speechSynthesisBlocking) {
-      this.modules.set("speech", new SpeechSynthesisBlocking({ ...this.config.speechSynthesisBlocking, onEvent }));
+      this.modules.set(
+        "speech",
+        new SpeechSynthesisBlocking({ ...this.config.speechSynthesisBlocking, onEvent }),
+      );
     }
     if (this.config.contentExpiration) {
-      this.modules.set("expiration", new ContentExpiration({ ...this.config.contentExpiration, onEvent }));
+      this.modules.set(
+        "expiration",
+        new ContentExpiration({ ...this.config.contentExpiration, onEvent }),
+      );
     }
     if (this.config.mediaProtection) {
       this.modules.set("media", new MediaProtection({ ...this.config.mediaProtection, onEvent }));
     }
     if (this.config.mediaStreamProtection) {
-      this.modules.set("mediaStream", new MediaStreamProtection({ ...this.config.mediaStreamProtection, onEvent }));
+      this.modules.set(
+        "mediaStream",
+        new MediaStreamProtection({ ...this.config.mediaStreamProtection, onEvent }),
+      );
     }
     if (this.config.tamperDetection) {
       this.modules.set("tamper", new TamperDetection({ ...this.config.tamperDetection, onEvent }));

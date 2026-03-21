@@ -36,7 +36,7 @@ export class BrowserEnforcement implements ProtectionModule {
 
       if (this.config.action === "throw" || this.config.action === "both") {
         throw new Error(
-          `Browser not supported. Supported browsers: ${this.config.supportedBrowsers.join(", ")}`
+          `Browser not supported. Supported browsers: ${this.config.supportedBrowsers.join(", ")}`,
         );
       }
     }

@@ -45,9 +45,7 @@ export class SpeechSynthesisBlocking implements ProtectionModule {
         const max = this.config.maxCharacters ?? 500;
         if (utterance.text.length > max) {
           // Create a new utterance with truncated text
-          const truncated = new SpeechSynthesisUtterance(
-            utterance.text.substring(0, max)
-          );
+          const truncated = new SpeechSynthesisUtterance(utterance.text.substring(0, max));
           truncated.lang = utterance.lang;
           truncated.pitch = utterance.pitch;
           truncated.rate = utterance.rate;

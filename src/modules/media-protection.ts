@@ -81,9 +81,9 @@ export class MediaProtection implements ProtectionModule {
           if (node instanceof HTMLAudioElement || node instanceof HTMLVideoElement) {
             this.protectSingleMedia(node);
           } else if (node instanceof HTMLElement) {
-            node.querySelectorAll("audio, video").forEach((el) =>
-              this.protectSingleMedia(el as HTMLMediaElement)
-            );
+            node
+              .querySelectorAll("audio, video")
+              .forEach((el) => this.protectSingleMedia(el as HTMLMediaElement));
           }
         }
       }
@@ -117,9 +117,9 @@ export class MediaProtection implements ProtectionModule {
   }
 
   private protectMedia(root: HTMLElement): void {
-    root.querySelectorAll("audio, video").forEach((el) =>
-      this.protectSingleMedia(el as HTMLMediaElement)
-    );
+    root
+      .querySelectorAll("audio, video")
+      .forEach((el) => this.protectSingleMedia(el as HTMLMediaElement));
   }
 
   private protectSingleMedia(el: HTMLMediaElement): void {
@@ -190,7 +190,9 @@ export class MediaProtection implements ProtectionModule {
       el.muted = wasMuted;
 
       if (wasPlaying) {
-        el.play().catch(() => {/* autoplay blocked */});
+        el.play().catch(() => {
+          /* autoplay blocked */
+        });
       }
     } catch {
       // cross-origin or network failure — leave original
@@ -233,11 +235,15 @@ export class MediaProtection implements ProtectionModule {
    * When protected, accessing el.currentSrc or el.src returns empty string.
    */
   private interceptSourceAccess(): void {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     // Store original descriptors
     const mediaSrcDesc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src");
-    const mediaCurrentSrcDesc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "currentSrc");
+    const mediaCurrentSrcDesc = Object.getOwnPropertyDescriptor(
+      HTMLMediaElement.prototype,
+      "currentSrc",
+    );
 
     this.originalGetters.set("src", mediaSrcDesc);
     this.originalGetters.set("currentSrc", mediaCurrentSrcDesc);
@@ -306,7 +312,7 @@ export class MediaProtection implements ProtectionModule {
             d.kind === "audiooutput" &&
             (d.label.toLowerCase().includes("virtual") ||
               d.label.toLowerCase().includes("cable") ||
-              d.label.toLowerCase().includes("stereo mix"))
+              d.label.toLowerCase().includes("stereo mix")),
         );
 
         if (suspiciousDevices.length > 0) {
