@@ -4,7 +4,13 @@
  */
 
 import type { ProtectionModule, CommonTargets, ProtectionEventCallback } from "../types";
-import { type ListenerRecord, addListenerSafe, removeAllListeners, collectTargets, isMac } from "../utils";
+import {
+  type ListenerRecord,
+  addListenerSafe,
+  removeAllListeners,
+  collectTargets,
+  isMac,
+} from "../utils";
 
 export interface CopyProtectionConfig extends CommonTargets {
   /** "block" prevents all copying; "restrict" allows up to maxCharacters */
@@ -51,7 +57,7 @@ export class CopyProtection implements ProtectionModule {
     const targets = collectTargets(
       this.config.contentElement,
       this.config.additionalElements,
-      this.config.contentIframes
+      this.config.contentIframes,
     );
 
     const copyHandler = (e: Event) => this.onCopy(e as ClipboardEvent);

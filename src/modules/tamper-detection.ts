@@ -288,7 +288,7 @@ export class TamperDetection implements ProtectionModule {
       this.restoreTimer = null;
       // Only restore if sentinels are clean now
       const stillTampered = this.sentinels.some(
-        (s) => !s.isConnected || this.hasSuspiciousStyles(s) || this.hasSuspiciousComputedStyles(s)
+        (s) => !s.isConnected || this.hasSuspiciousStyles(s) || this.hasSuspiciousComputedStyles(s),
       );
       if (!stillTampered) {
         this.isHacked = false;

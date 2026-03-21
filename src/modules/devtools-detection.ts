@@ -92,15 +92,27 @@ export class DevToolsDetection implements ProtectionModule {
     this.detected = true;
 
     if (this.config.clearConsole) {
-      try { console.clear(); } catch { /* */ }
+      try {
+        console.clear();
+      } catch {
+        /* */
+      }
     }
 
     if (this.config.clearLocalStorage) {
-      try { window.localStorage.clear(); } catch { /* */ }
+      try {
+        window.localStorage.clear();
+      } catch {
+        /* */
+      }
     }
 
     if (this.config.clearSessionStorage) {
-      try { window.sessionStorage.clear(); } catch { /* */ }
+      try {
+        window.sessionStorage.clear();
+      } catch {
+        /* */
+      }
     }
 
     if (this.config.action === "callback" || this.config.action === "both") {

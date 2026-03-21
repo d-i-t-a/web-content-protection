@@ -123,7 +123,11 @@ export class ImageProtection implements ProtectionModule {
       img.draggable = false;
       const rec = addListenerSafe(img, "dragstart", (e) => {
         e.preventDefault();
-        this.config.onEvent?.({ type: "image_protected", timestamp: Date.now(), detail: "drag_blocked" });
+        this.config.onEvent?.({
+          type: "image_protected",
+          timestamp: Date.now(),
+          detail: "drag_blocked",
+        });
       });
       if (rec) this.listeners.push(rec);
     }
@@ -147,7 +151,11 @@ export class ImageProtection implements ProtectionModule {
     const rec = addListenerSafe(img, "contextmenu", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      this.config.onEvent?.({ type: "image_protected", timestamp: Date.now(), detail: "context_menu_blocked" });
+      this.config.onEvent?.({
+        type: "image_protected",
+        timestamp: Date.now(),
+        detail: "context_menu_blocked",
+      });
     });
     if (rec) this.listeners.push(rec);
   }

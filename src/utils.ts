@@ -29,7 +29,7 @@ export function addListenerSafe(
   target: EventTarget | null | undefined,
   type: string,
   handler: EventListenerOrEventListenerObject,
-  options?: boolean | AddEventListenerOptions
+  options?: boolean | AddEventListenerOptions,
 ): ListenerRecord | null {
   if (!target) return null;
   try {
@@ -58,7 +58,7 @@ export function removeAllListeners(records: ListenerRecord[]): void {
 export function collectTargets(
   contentElement: HTMLElement,
   additionalElements?: HTMLElement[],
-  contentIframes?: HTMLIFrameElement[]
+  contentIframes?: HTMLIFrameElement[],
 ): EventTarget[] {
   const targets: EventTarget[] = [contentElement, window, document];
 

@@ -29,7 +29,7 @@ export class ContextMenuProtection implements ProtectionModule {
     const targets = collectTargets(
       this.config.contentElement,
       this.config.additionalElements,
-      this.config.contentIframes
+      this.config.contentIframes,
     );
 
     for (const target of targets) {

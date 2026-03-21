@@ -107,10 +107,7 @@ export class SelectionLimiting implements ProtectionModule {
 
   private truncateRange(range: Range, doc: Document, maxChars: number): void {
     // Create a tree walker starting from the range start
-    const walker = doc.createTreeWalker(
-      range.commonAncestorContainer,
-      NodeFilter.SHOW_TEXT
-    );
+    const walker = doc.createTreeWalker(range.commonAncestorContainer, NodeFilter.SHOW_TEXT);
 
     let charCount = 0;
     let node = walker.nextNode();

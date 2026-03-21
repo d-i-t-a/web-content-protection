@@ -278,7 +278,11 @@ export class TextObfuscation implements ProtectionModule {
           mutation.target.parentElement === this.securityContainer
         ) {
           this.isHacked = true;
-          this.config.onEvent?.({ type: "tamper_detected", timestamp: Date.now(), detail: "sentinel" });
+          this.config.onEvent?.({
+            type: "tamper_detected",
+            timestamp: Date.now(),
+            detail: "sentinel",
+          });
           this.updateAllRects();
           return;
         }

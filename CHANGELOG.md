@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1 (2026-03-21)
+
+- Add ESLint + Prettier for consistent code formatting
+- Add `lint`, `lint:fix`, `format`, `format:check` npm scripts
+- `prepublishOnly` now runs lint before build
+- Fix unused import and unused variable
+
 ## 1.0.0 (2026-03-20)
 
 Initial release.

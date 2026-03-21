@@ -114,10 +114,7 @@ export class PrintProtection implements ProtectionModule {
   }
 
   private onBeforePrint(): void {
-    const elements = [
-      this.config.contentElement,
-      ...(this.config.additionalElements ?? []),
-    ];
+    const elements = [this.config.contentElement, ...(this.config.additionalElements ?? [])];
     for (const el of elements) {
       el.style.setProperty("display", "none", "important");
       el.style.setProperty("visibility", "hidden", "important");
@@ -125,10 +122,7 @@ export class PrintProtection implements ProtectionModule {
   }
 
   private onAfterPrint(): void {
-    const elements = [
-      this.config.contentElement,
-      ...(this.config.additionalElements ?? []),
-    ];
+    const elements = [this.config.contentElement, ...(this.config.additionalElements ?? [])];
     for (const el of elements) {
       el.style.removeProperty("display");
       el.style.removeProperty("visibility");
