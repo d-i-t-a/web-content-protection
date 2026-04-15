@@ -66,7 +66,7 @@ jobs:
         run: npm run build
 
       - name: Publish to npmjs.com
-        run: npm publish --tag ${{ steps.distTag.outputs.tag }} --provenance --access public
+        run: npm publish --tag ${{ steps.distTag.outputs.tag }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
