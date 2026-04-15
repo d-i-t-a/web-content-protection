@@ -53,11 +53,14 @@ jobs:
             exit 1
           fi
 
-      - name: Setup Node (npmjs.com)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
+
+      - name: Update npm for Trusted Publishing
+        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: npm ci
