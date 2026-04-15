@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chapter One</title>
+  <style>
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.8;
+      color: #1a1a1a;
+      padding: 40px 60px;
+      margin: 0;
+      background: #faf9f6;
+    }
+    h3 { font-size: 22px; margin: 48px 0 16px; }
+    p { margin-bottom: 16px; text-indent: 24px; }
+    p:first-of-type { text-indent: 0; }
+    blockquote {
+      border-left: 3px solid #ccc;
+      margin: 24px 0;
+      padding: 12px 24px;
+      font-style: italic;
+      color: #555;
+    }
+    em { font-style: italic; }
+  </style>
+</head>
+<body>
+  <h3>Chapter 1: The Highway</h3>
+
+  <p>The email arrived at 3:47 AM, because catastrophe has no respect for time zones.</p>
+
+  <p>Aferdita read it in bed, one eye squinted against the blue glow: <em>"Your entire fall catalog is on a pirate site. All 240 titles. Already seeded to twelve mirror sites."</em></p>
+
+  <p>She didn't scream. She didn't swear. She lay very still and watched the ceiling fan make its slow, stupid circles. Two years of her authors' work. Fourteen months of her team's engineering. Gone — or rather, everywhere, which was worse than gone.</p>
+
+  <p>She called Dion. Her head of engineering answered on the first ring, which meant he already knew.</p>
+
+  <p>"The web reader," he said. No greeting, no preamble. "I told the board. You put a book in a browser, and the browser is the user's machine. It's their DOM. Their JavaScript console. Their clipboard. We handed them the keys and asked them nicely not to make copies."</p>
+
+  <p>Aferdita stared at the ceiling fan. "Dedicated apps?"</p>
+
+  <p>"Our readers would riot. Nobody downloads apps anymore to read books."</p>
+
+  <p>"Then what?"</p>
+
+  <p>A pause. She heard Dion's espresso machine gurgling — the man was already in his kitchen, already thinking. "We don't need a vault," he said finally. "We need a <em>very</em> good fence."</p>
+
+  <p>Aferdita smiled despite herself. "How many locks?"</p>
+
+  <p>"As many as it takes."</p>
+
+  <h3>Chapter 2: The Menu</h3>
+
+  <p>Monday morning. Whiteboard. Three coffees on the table, all black, all already half-empty. Dion stood at the board with a red marker.</p>
+
+  <p>"The clipboard," he said, drawing a thick arrow from a box labeled BOOK to a box labeled WORLD, "is a six-lane highway out of your application. Right now we have no toll booths, no speed cameras, and the signs say 'Free Parking.'"</p>
+
+  <p>Aria, the youngest engineer on the team and already the most dangerous, demonstrated: she selected a full page of text, pressed Ctrl+C, opened her email, and pressed Ctrl+V. The entire chapter appeared, perfectly formatted, in a draft to herself.</p>
+
+  <p>"Thirty seconds," she said. "I just stole chapter four."</p>
+
+  <p>Dion's solution was elegant. Every copy event, every cut event, every keyboard shortcut that could possibly invoke them — intercepted at the door. In block mode, the clipboard received nothing but a polite placeholder. In restrict mode, readers could copy a sentence, maybe two — enough to tweet a quote, never enough to reconstruct a page.</p>
+
+  <blockquote>"You don't have to stop every thief," Dion said. "You just have to make stealing <em>feel</em> like stealing."</blockquote>
+
+  <h3>Chapter 3: Catch and Release</h3>
+
+  <p>The drag vulnerability was Aria's favorite party trick. She would select two paragraphs of text, hold down the mouse button, and — in one smooth motion — drag the selection out of the browser window and drop it directly into a text editor on her desktop.</p>
+
+  <p>"Nobody thinks about drag-and-drop," she said, doing it again for emphasis. The text appeared in Sublime Text, perfectly intact. "They think about copy and paste. They think about screenshots. But drag? It's the back door everyone leaves unlocked because they forget it's there."</p>
+
+  <p>Dion closed the vulnerability in an afternoon. Every dragstart event, every drag, every drop — suppressed. CSS properties layered on top: user-drag set to none, the webkit variant too. Images had their draggable attribute stripped. The mouse button became inert for extraction.</p>
+
+  <h3>Chapter 4: Gutenberg's Ghost</h3>
+
+  <p>Print was the ghost in the machine. The browser's print dialog was a perfect reproduction engine — it would happily render every page of a book into a pristine PDF, complete with fonts, layout, and images. A one-click piracy pipeline built into every browser by default.</p>
+
+  <p>Dion's approach was dual-layered. First, CSS: a media print rule that set every element to display none. If someone opened print preview, they saw blank pages. Second, JavaScript: the beforeprint event triggered a visibility toggle, and Ctrl+P was intercepted before it could reach the browser.</p>
+
+  <p>"But what about legitimate printing?" Aria asked. "Classroom use, personal archives?"</p>
+
+  <p>"The publisher decides," Dion said. "Not the browser."</p>
+
+  <h3>Chapter 5: The Cipher</h3>
+
+  <p>Text obfuscation was the team's most ambitious lock. The idea was simple in concept and terrifying in execution: all text outside the reader's visible viewport would be scrambled in the DOM itself. Characters shuffled within words, rendering the HTML source — and any attempt to scrape it — into linguistic noise.</p>
+
+  <p>The implementation tracked scroll position with surgical precision. A viewport padding of fifty pixels ensured seamless reading — text unscrambled just before it became visible, and re-scrambled just after it left view. The user saw a perfectly readable book. The DOM saw chaos.</p>
+
+  <p>"What if someone saves the page?" Aria asked.</p>
+
+  <p>"They get gibberish," Dion said. "The save captures the DOM state, and the DOM state is scrambled. Only what's on screen is real."</p>
+
+  <h3>Chapter 6: The Arms Race</h3>
+
+  <p>DevTools detection was the most controversial module. Every modern browser shipped with developer tools — a debugger, a console, a DOM inspector. For web developers, it was essential. For content pirates, it was a skeleton key.</p>
+
+  <p>Dion's detector used a window-size heuristic. When DevTools opened, the browser's inner dimensions shrank relative to its outer dimensions — a difference of more than two hundred pixels triggered the alarm. A secondary check used the devtools-detector library for more sophisticated detection.</p>
+
+  <p>The actions were configurable: redirect the user, clear local storage, or fire a callback for the host app to handle. In production, most publishers chose the callback — logging the event and degrading the experience rather than punishing the user outright.</p>
+
+  <h3>Chapter 7: White Out</h3>
+
+  <p>Screenshot prevention was, Aria admitted, "fighting physics." You cannot prevent a camera pointed at a screen. You cannot prevent a hardware capture card. What you can prevent is the easy path — the PrintScreen key, the Alt+Tab to a screenshot tool, the browser extension that captures the visible tab.</p>
+
+  <p>The Page Visibility API became their first line of defense. When the tab became hidden — Alt+Tab, window switch, screen capture tool activation — the content blanked. A white rectangle where the book used to be. When the tab returned to focus, the content faded back in after a configurable delay.</p>
+
+  <p>Window blur added a second layer. Even without a tab switch, losing focus to another window triggered the same blanking behavior. The PrintScreen key was intercepted directly, its default behavior suppressed.</p>
+
+  <h3>Chapter 8: Zero Width</h3>
+
+  <p>Watermarking was invisible and inescapable. Every copy, every screenshot, every save carried a fingerprint back to the user who made it. The visual watermark was a near-transparent overlay — opacity set to two percent, rendering the user ID and timestamp in text so faint it was invisible to the naked eye but recoverable through image processing.</p>
+
+  <p>The text fingerprint was more devious. Zero-width Unicode characters — invisible characters that occupy no visual space — were injected between words. Each sequence encoded the user's identity. Copy the text, paste it anywhere, and the fingerprint traveled with it. The pirate's identity was embedded in the very letters they stole.</p>
+
+  <p>"It won't stop them from copying," Dion said. "But it will stop them from being anonymous."</p>
+
+  <h3>Chapter 9: The Tape Measure</h3>
+
+  <p>Selection limiting was the quiet guardian. It didn't prevent selection — that would break the reading experience. It simply measured. When a selection exceeded a configured character count, it collapsed. The user could highlight a sentence, a paragraph. They could not highlight a chapter.</p>
+
+  <p>The behavior was configurable: collapse the selection to its start, trim it to the maximum length, or warn the user with a visual indicator. Publishers chose their own threshold — some generous, some strict, all within their rights.</p>
+
+  <h3>Chapter 10: The Last Line</h3>
+
+  <p>Image protection was the final module they built, and in some ways the most complex. Images in the DOM were vulnerable from every direction: right-click to save, drag to desktop, open in new tab via the URL, inspect element to find the source.</p>
+
+  <p>Dion's solution was layered. Pointer-events set to none prevented right-click menus. A transparent overlay div above each image intercepted all mouse interactions. For maximum security, images could be rendered into canvas elements — the original img tag replaced entirely, the source URL erased from the DOM.</p>
+
+  <p>Blob URL conversion added the final layer. The original image URL was fetched, converted to a blob, and the img src replaced with a blob URL that would be meaningless if copied or bookmarked.</p>
+
+  <blockquote>"A determined attacker will always find a way," Dion said at the end. "But a casual thief? We've made it so inconvenient that buying the book is easier than stealing it. And that's the whole point."</blockquote>
+
+  <p>Aferdita looked at the whiteboard, now covered in diagrams and arrows and crossed-out ideas. Nineteen modules. Nineteen locks. Not a vault — a fence. But a very, very good one.</p>
+
+  <p>"Ship it," she said.</p>
+</body>
+</html>
