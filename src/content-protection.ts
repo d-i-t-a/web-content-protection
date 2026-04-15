@@ -94,6 +94,11 @@ export class ContentProtection {
     const onEvent = (event: ProtectionEvent) => {
       this.eventLog.push(event);
       this.config.onEvent?.(event);
+
+      // DevTools detected — permanently scramble all text
+      if (event.type === "devtools_detected") {
+        this.textObfuscation?.scrambleAll();
+      }
     };
 
     if (this.config.dragPrevention) {
