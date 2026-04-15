@@ -3,10 +3,10 @@ name: Publish
 # Publishes to both npmjs.com and GitHub Packages on tag push.
 # Tags matching `v*` trigger this workflow.
 #
-# Requirements:
-#   - Repo secret: NPM_TOKEN (npmjs.com automation token with publish access)
-#   - GITHUB_TOKEN is provided automatically by Actions; permissions block below
-#     grants it `packages: write` so it can publish to GitHub Packages.
+# Authentication:
+#   - npmjs.com: Trusted Publishing (OIDC) — no token needed.
+#     Configure at https://www.npmjs.com/package/@d-i-t-a/web-content-protection/access
+#   - GitHub Packages: GITHUB_TOKEN (automatic)
 #
 # Usage:
 #   npm version 1.1.0     # or 1.2.0-alpha.1, etc — bumps package.json + creates tag
@@ -23,7 +23,7 @@ jobs:
     permissions:
       contents: read
       packages: write   # required for publishing to GitHub Packages
-      id-token: write   # required for npm provenance attestation
+      id-token: write   # required for npm Trusted Publishing (OIDC)
 
     steps:
       - name: Checkout
@@ -67,8 +67,6 @@ jobs:
 
       - name: Publish to npmjs.com
         run: npm publish --tag ${{ steps.distTag.outputs.tag }} --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Setup Node (GitHub Packages)
         uses: actions/setup-node@v4
