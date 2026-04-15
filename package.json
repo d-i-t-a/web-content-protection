@@ -53,8 +53,8 @@
     "obfuscation",
     "web-reader"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/d-i-t-a/web-content-protection"
+  "repository": "https://github.com/d-i-t-a/web-content-protection",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   }
 }
