@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0 (2026-04-15)
+
+- **TextObfuscation iframe support** — add `contentIframes` config option to scramble text inside iframes with live viewport checks for both scrolling and paginated (CSS columns + translateX) layouts
+- **DevTools tamper response** — `scrambleAll()` method permanently scrambles all text when DevTools is detected; requires page refresh to restore
+- **Publish workflow** — GitHub Actions workflow for automated publishing to npm and GitHub Packages on tag push
+- Iframe demos (scrolling and paginated)
+
 ## 1.0.1 (2026-03-21)
 
 - Add ESLint + Prettier for consistent code formatting

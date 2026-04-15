@@ -81,8 +81,9 @@ const protection = new ContentProtection({
   keyboardProtection: { contentElement: contentEl, contentIframes: iframes },
   devToolsDetection: { action: "redirect" },
   textObfuscation: {
-    scrollContainer: iframes[0].contentDocument!.documentElement,
-    contentRoot: iframes[0].contentDocument!.body,
+    scrollContainer: contentEl,
+    contentRoot: contentEl,
+    contentIframes: iframes,
   },
 });
 
@@ -101,7 +102,7 @@ Each module can be used standalone or through the orchestrator.
 | **ContextMenuProtection** | Disables right-click context menu |
 | **KeyboardProtection** | Blocks Save, View Source, DevTools, F12, and custom key combos |
 | **DevToolsDetection** | Detects open DevTools; can redirect, clear storage, or fire callback |
-| **TextObfuscation** | Scrambles text outside viewport; DOM dumps return gibberish |
+| **TextObfuscation** | Scrambles text outside viewport in main document and iframes; supports scrolling and paginated layouts; DOM dumps return gibberish |
 | **LinkUrlHiding** | Hides link target URLs from status bar |
 | **BrowserEnforcement** | Restricts to whitelisted browsers |
 | **ScreenshotDetection** | Blanks content on tab blur / visibility change / PrintScreen |
@@ -152,12 +153,13 @@ protection.copyProtection!.citationMode = false;
 
 ## Text Obfuscation
 
-The most effective client-side protection. All text outside the visible viewport is scrambled. A `document.body.innerText` dump returns gibberish.
+The most effective client-side protection. All text outside the visible viewport is scrambled. A `document.body.innerText` dump returns gibberish. Supports both scrolling and paginated (CSS columns + translateX) layouts.
 
 ```typescript
 textObfuscation: {
-  scrollContainer: scrollEl,
-  contentRoot: bodyEl,
+  scrollContainer: readerFrame,
+  contentRoot: readerFrame,
+  contentIframes: [iframe],       // obfuscates text inside iframes
   excludeNodes: ["script", "style", "code"],
   viewportPadding: 50,
 }
@@ -167,6 +169,18 @@ Call `reinitialize()` on page/chapter changes:
 ```typescript
 protection.textObfuscation!.reinitialize();
 ```
+
+Call `recalculate()` after page turns in paginated layouts:
+```typescript
+protection.textObfuscation!.recalculate();
+```
+
+Call `scrambleAll()` to permanently scramble all text (requires page refresh to undo):
+```typescript
+protection.textObfuscation!.scrambleAll();
+```
+
+When `devToolsDetection` is enabled, `scrambleAll()` is called automatically when DevTools is detected.
 
 ## Watermarking
 
