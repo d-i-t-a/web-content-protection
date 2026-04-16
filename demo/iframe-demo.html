@@ -175,14 +175,14 @@
   </header>
 
   <div class="layout">
-    <!-- Mimics the Axis reader structure: outer div + iframe with book content -->
+    <!-- Outer div + iframe with book content -->
     <div id="epub-reader-frame">
       <iframe id="epubContentIframe" src="iframe-content.html" aria-label="Book Content"></iframe>
     </div>
 
     <div class="sidebar">
       <div class="info-bar">
-        This demo loads book content inside an <code>&lt;iframe&gt;</code>, mimicking the Axis/R2D2BC reader architecture.
+        This demo loads book content inside an <code>&lt;iframe&gt;</code>, a common reader architecture.
         Text obfuscation targets the iframe's <code>contentDocument.body</code> via the <code>contentIframes</code> config.
         Try "Save Page As" — the saved HTML should contain scrambled text.
       </div>

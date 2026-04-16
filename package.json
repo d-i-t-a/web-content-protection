@@ -1,6 +1,6 @@
 {
   "name": "@d-i-t-a/web-content-protection",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Client-side content protection for web-based ebook readers. Drag prevention, copy protection, print blocking, text obfuscation, DevTools detection, and more.",
   "author": "AM Consulting LLC (DITA)",
   "license": "Apache-2.0",

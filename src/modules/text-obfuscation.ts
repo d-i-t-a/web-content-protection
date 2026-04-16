@@ -168,12 +168,15 @@ export class TextObfuscation implements ProtectionModule {
 
     const pad = this.config.viewportPadding ?? 50;
 
-    // Outer container visible range (for main document nodes)
+    // Use scrollContainer's SCREEN-SPACE rect as the visible viewport for ALL nodes.
+    // Iframe nodes are translated from iframe-local to screen space via iframe offset.
+    // This handles any layout — scroll, translateX, translateY, transforms.
     const container = this.config.scrollContainer;
-    const scrollTop = container.scrollTop;
-    const viewportHeight = container.clientHeight;
-    const visibleTop = scrollTop - pad;
-    const visibleBottom = scrollTop + viewportHeight + pad;
+    const containerScreenRect = container.getBoundingClientRect();
+    const containerScreenLeft = containerScreenRect.left - pad;
+    const containerScreenRight = containerScreenRect.right + pad;
+    const containerScreenTop = containerScreenRect.top - pad;
+    const containerScreenBottom = containerScreenRect.bottom + pad;
 
     // Disconnect mutation observers during our own updates
     this.mutationObserver?.disconnect();
@@ -181,15 +184,13 @@ export class TextObfuscation implements ProtectionModule {
       obs.disconnect();
     }
 
-    // Cache iframe viewport dimensions
-    const iframeViewports = new Map<HTMLIFrameElement, { width: number; height: number }>();
+    // Cache iframe screen positions (so we don't recompute per node)
+    const iframeOffsets = new Map<HTMLIFrameElement, { left: number; top: number }>();
     if (this.config.contentIframes) {
       for (const iframe of this.config.contentIframes) {
         try {
-          iframeViewports.set(iframe, {
-            width: iframe.clientWidth,
-            height: iframe.clientHeight,
-          });
+          const r = iframe.getBoundingClientRect();
+          iframeOffsets.set(iframe, { left: r.left, top: r.top });
         } catch {
           // cross-origin
         }
@@ -200,25 +201,34 @@ export class TextObfuscation implements ProtectionModule {
       let outside: boolean;
 
       if (rect.iframe) {
-        // For iframe nodes: measure live — getBoundingClientRect() returns
-        // viewport-relative coordinates within the iframe's own viewport.
-        const vp = iframeViewports.get(rect.iframe);
-        if (vp) {
+        // Iframe node bounds are relative to iframe's viewport.
+        // Add iframe screen offset to get screen-space coords.
+        // Then check overlap with scrollContainer's screen rect.
+        const off = iframeOffsets.get(rect.iframe);
+        if (off) {
           const bounds = this.measureTextNode(rect.node);
-          // Vertical check
-          const isAbove = bounds.bottom < -pad;
-          const isBelow = bounds.top > vp.height + pad;
-          // Horizontal check
-          const isLeft = bounds.right < -pad;
-          const isRight = bounds.left > vp.width + pad;
-          outside = isAbove || isBelow || isLeft || isRight;
+          const screenLeft = bounds.left + off.left;
+          const screenRight = bounds.right + off.left;
+          const screenTop = bounds.top + off.top;
+          const screenBottom = bounds.bottom + off.top;
+          outside =
+            screenRight < containerScreenLeft ||
+            screenLeft > containerScreenRight ||
+            screenBottom < containerScreenTop ||
+            screenTop > containerScreenBottom;
         } else {
           outside = true;
         }
       } else {
-        // For main document nodes: use stored document-relative positions
-        const nodeBottom = rect.offsetTop + rect.height;
-        outside = nodeBottom < visibleTop || rect.offsetTop > visibleBottom;
+        // Main document nodes: live measure node bounds in screen space and
+        // check overlap with scrollContainer's screen rect.
+        // This works for any layout — scroll, translateX, translateY, transform.
+        const bounds = this.measureTextNode(rect.node);
+        outside =
+          bounds.right < containerScreenLeft ||
+          bounds.left > containerScreenRight ||
+          bounds.bottom < containerScreenTop ||
+          bounds.top > containerScreenBottom;
       }
 
       // Unscramble: in viewport and not tampered
