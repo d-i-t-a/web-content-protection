@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tall Content (scrollview)</title>
+  <style>
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.8;
+      color: #1a1a1a;
+      background: #faf9f6;
+      padding: 40px 60px;
+      word-break: break-word;
+    }
+    h3 { font-size: 22px; margin: 48px 0 16px; }
+    h3:first-child { margin-top: 0; }
+    p { margin-bottom: 16px; text-indent: 24px; }
+    p:first-of-type { text-indent: 0; }
+    blockquote { border-left: 3px solid #ccc; margin: 24px 0; padding: 12px 24px; font-style: italic; color: #555; }
+  </style>
+  <script>
+    // On load: wait for fonts/layout, measure body.scrollHeight, post "ready" to parent.
+    window.addEventListener("load", async () => {
+      if (document.fonts) {
+        try { await document.fonts.ready; } catch (e) {}
+      }
+      await new Promise(r => requestAnimationFrame(r));
+      await new Promise(r => requestAnimationFrame(r));
+      const totalHeight = document.body.scrollHeight;
+      window.parent.postMessage({ type: "ready", totalHeight }, "*");
+    });
+  </script>
+</head>
+<body>
+  <h3>Chapter 1: The Highway</h3>
+  <p>The email arrived at 3:47 AM, because catastrophe has no respect for time zones.</p>
+  <p>Aferdita read it in bed, one eye squinted against the blue glow: <em>"Your entire fall catalog is on a pirate site. All 240 titles. Already seeded to twelve mirror sites."</em></p>
+  <p>She didn't scream. She didn't swear. She lay very still and watched the ceiling fan make its slow, stupid circles. Two years of her authors' work. Fourteen months of her team's engineering. Gone — or rather, everywhere, which was worse than gone.</p>
+  <p>She called Dion. Her head of engineering answered on the first ring, which meant he already knew.</p>
+  <p>"The web reader," he said. No greeting, no preamble. "I told the board. You put a book in a browser, and the browser is the user's machine. It's their DOM. Their JavaScript console. Their clipboard."</p>
+  <p>Aferdita stared at the ceiling fan. "Dedicated apps?"</p>
+  <p>"Our readers would riot. Nobody downloads apps anymore to read books."</p>
+  <p>"Then what?"</p>
+  <p>A pause. "We don't need a vault," he said finally. "We need a <em>very</em> good fence."</p>
+  <p>Aferdita smiled despite herself. "How many locks?"</p>
+  <p>"As many as it takes."</p>
+
+  <h3>Chapter 2: The Menu</h3>
+  <p>Monday morning. Whiteboard. Three coffees on the table, all black, all already half-empty. Dion stood at the board with a red marker.</p>
+  <p>"The clipboard is a six-lane highway out of your application. Right now we have no toll booths, no speed cameras, and the signs say 'Free Parking.'"</p>
+  <p>Aria, the youngest engineer on the team and already the most dangerous, demonstrated: she selected a full page of text, pressed Ctrl+C, opened her email, and pressed Ctrl+V. The entire chapter appeared, perfectly formatted, in a draft to herself.</p>
+  <p>"Thirty seconds," she said. "I just stole chapter four."</p>
+  <p>Dion's solution was elegant. Every copy event, every cut event, every keyboard shortcut that could possibly invoke them — intercepted at the door.</p>
+  <blockquote>"You don't have to stop every thief," Dion said. "You just have to make stealing <em>feel</em> like stealing."</blockquote>
+
+  <h3>Chapter 3: Catch and Release</h3>
+  <p>The drag vulnerability was Aria's favorite party trick. She would select two paragraphs of text, hold down the mouse button, and drag the selection out of the browser window and drop it directly into a text editor on her desktop.</p>
+  <p>Dion closed the vulnerability in an afternoon. Every dragstart event, every drag, every drop — suppressed. CSS properties layered on top: user-drag set to none, the webkit variant too.</p>
+
+  <h3>Chapter 4: Gutenberg's Ghost</h3>
+  <p>Print was the ghost in the machine. The browser's print dialog was a perfect reproduction engine — it would happily render every page of a book into a pristine PDF.</p>
+  <p>Dion's approach was dual-layered. First, CSS: a media print rule that set every element to display none. Second, JavaScript: the beforeprint event triggered a visibility toggle.</p>
+
+  <h3>Chapter 5: The Cipher</h3>
+  <p>Text obfuscation was the team's most ambitious lock. The idea was simple in concept and terrifying in execution: all text outside the reader's visible viewport would be scrambled in the DOM itself.</p>
+  <p>The implementation tracked scroll position with surgical precision. The user saw a perfectly readable book. The DOM saw chaos.</p>
+  <p>"What if someone saves the page?" Aria asked. "They get gibberish," Dion said.</p>
+
+  <h3>Chapter 6: Zero Width</h3>
+  <p>Watermarking was invisible and inescapable. Every copy, every screenshot, every save carried a fingerprint back to the user who made it.</p>
+  <p>The text fingerprint was more devious. Zero-width Unicode characters were injected between words.</p>
+
+  <h3>Chapter 7: The Tape Measure</h3>
+  <p>Selection limiting was the quiet guardian. It didn't prevent selection. It simply measured. When a selection exceeded a configured character count, it collapsed.</p>
+
+  <h3>Chapter 8: The Last Line</h3>
+  <p>Image protection was the final module they built. Pointer-events set to none prevented right-click menus.</p>
+  <blockquote>"A determined attacker will always find a way," Dion said. "But a casual thief? We've made it so inconvenient that buying the book is easier than stealing it."</blockquote>
+  <p>Aferdita looked at the whiteboard. Nineteen modules. Nineteen locks. "Ship it," she said.</p>
+</body>
+</html>

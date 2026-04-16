@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@d-i-t-a/web-content-protection — Demos</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e1e4e8;
+      min-height: 100vh;
+      padding: 40px 24px;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #f0f6fc;
+      margin-bottom: 8px;
+    }
+    h1 span { color: #58a6ff; }
+    .subtitle {
+      color: #8b949e;
+      font-size: 14px;
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f0f6fc;
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #30363d;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .demo-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 20px;
+      transition: border-color 0.15s, transform 0.15s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .demo-card:hover {
+      border-color: #58a6ff;
+      transform: translateY(-2px);
+    }
+    .demo-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f0f6fc;
+      margin-bottom: 8px;
+    }
+    .demo-card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-right: 6px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .badge.scroll { background: #1f6feb33; color: #58a6ff; }
+    .badge.paginated { background: #f0883e33; color: #f0883e; }
+    .badge.iframe { background: #2ea04333; color: #3fb950; }
+    .badge.no-iframe { background: #8b949e33; color: #8b949e; }
+    .demo-card p {
+      color: #8b949e;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .demo-card code {
+      background: #21262d;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 11px;
+      color: #f0883e;
+    }
+    .footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid #30363d;
+      color: #8b949e;
+      font-size: 12px;
+      text-align: center;
+    }
+    .footer a { color: #58a6ff; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span>@d-i-t-a/</span>web-content-protection</h1>
+    <div class="subtitle">Demos covering the layouts used by real ebook readers</div>
+
+    <h2>Direct DOM (no iframe)</h2>
+    <div class="grid">
+      <a class="demo-card" href="index.html">
+        <span class="badge no-iframe">no iframe</span>
+        <span class="badge scroll">scrollview</span>
+        <h3>Original demo — All 19 modules</h3>
+        <p>Content lives directly in the page DOM. Toggle each module on/off, see live event log. Long-form scrollable content.</p>
+      </a>
+      <a class="demo-card" href="paginated-demo.html">
+        <span class="badge no-iframe">no iframe</span>
+        <span class="badge paginated">paginated</span>
+        <h3>Non-iframe paginated</h3>
+        <p>Content lives directly in the page DOM with CSS columns. Wrapper with <code>overflow: hidden</code>, <code>translateX</code> on the content shifts pages.</p>
+      </a>
+    </div>
+
+    <h2>Single iframe (content scrolls/paginates inside the iframe)</h2>
+    <div class="grid">
+      <a class="demo-card" href="iframe-demo.html">
+        <span class="badge iframe">iframe</span>
+        <span class="badge scroll">scrollview</span>
+        <h3>Iframe scrollview</h3>
+        <p>Iframe with vertical scrolling content. The iframe itself is the scroll container.</p>
+      </a>
+      <a class="demo-card" href="iframe-paginated-demo.html">
+        <span class="badge iframe">iframe</span>
+        <span class="badge paginated">paginated</span>
+        <h3>Iframe paginated</h3>
+        <p>CSS columns + <code>translateX</code> on the body inside the iframe. Page turns shift the body.</p>
+      </a>
+    </div>
+
+    <h2>R2D2BC pattern (wrapper scrolls, iframe is wide/tall)</h2>
+    <div class="grid">
+      <a class="demo-card" href="iframe-r2d2bc-scroll-demo.html">
+        <span class="badge iframe">iframe</span>
+        <span class="badge scroll">scrollview</span>
+        <h3>R2D2BC scrollview</h3>
+        <p>Iframe sized to content height. Wrapper scrolls vertically via <code>wrapper.scrollTop</code>.</p>
+      </a>
+      <a class="demo-card" href="iframe-r2d2bc-paginated-demo.html">
+        <span class="badge iframe">iframe</span>
+        <span class="badge paginated">paginated</span>
+        <h3>R2D2BC paginated</h3>
+        <p>Wide iframe holds all columns. Wrapper has <code>overflow: hidden</code>, pages turn via <code>wrapper.scrollLeft</code>.</p>
+      </a>
+    </div>
+
+    <h2>Custom pattern (parent uses translateX/translateY, iframe is wide/tall)</h2>
+    <div class="grid">
+      <a class="demo-card" href="iframe-custom-scroll-demo.html">
+        <span class="badge iframe">iframe</span>
+        <span class="badge scroll">scrollview</span>
+        <h3>Custom scrollview</h3>
+        <p>Tall iframe wrapped in a clipper. <code>translateY</code> on a parent shifts content into view.</p>
+      </a>
+      <a class="demo-card" href="iframe-custom-paginated-demo.html">
+        <span class="badge iframe">iframe</span>
+        <span class="badge paginated">paginated</span>
+        <h3>Custom paginated</h3>
+        <p>Wide iframe holds all columns. Clipper with <code>overflow: hidden</code>, <code>translateX</code> on a parent shifts pages into view.</p>
+      </a>
+    </div>
+
+    <div class="footer">
+      <a href="https://github.com/d-i-t-a/web-content-protection">github.com/d-i-t-a/web-content-protection</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Paginated Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0f1117; color: #e1e4e8; min-height: 100vh; }
+    header { background: #161b22; border-bottom: 1px solid #30363d; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 16px; font-weight: 600; color: #f0f6fc; }
+    .toolbar { display: flex; gap: 8px; align-items: center; }
+    .toolbar button { padding: 6px 16px; border: 1px solid #30363d; border-radius: 6px; font-size: 13px; cursor: pointer; background: #21262d; color: #c9d1d9; }
+    .toolbar button.primary { background: #238636; color: #fff; }
+    .toolbar button.danger { background: #da3633; color: #fff; }
+    .status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #8b949e; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #f85149; }
+    .status-dot.active { background: #3fb950; }
+    .layout { display: grid; grid-template-columns: 1fr 320px; height: calc(100vh - 57px); }
+
+    /* Custom pattern: outer fixed-size, viewport-clipper has overflow hidden,
+       layout-view-root is wide and uses translateX to navigate */
+    #epub-reader-frame { position: relative; background: #faf9f6; width: 809px; height: 721px; margin: 20px auto; }
+    #viewport-clipper { width: 100%; height: 100%; overflow: hidden; position: relative; }
+    #layout-view-root { height: 721px; }
+    #layout-view-root iframe { border: none; display: block; height: 721px; width: 809px; }
+
+    .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; width: 48px; height: 80px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #666; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .nav-btn.prev { left: 4px; }
+    .nav-btn.next { right: 4px; }
+    .page-info { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #fff; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 4px; }
+
+    .reader-area { position: relative; background: #1c1c1c; display: flex; align-items: center; justify-content: center; }
+    .sidebar { background: #161b22; border-left: 1px solid #30363d; display: flex; flex-direction: column; }
+    .sidebar h2 { font-size: 13px; text-transform: uppercase; color: #8b949e; padding: 16px 16px 8px; }
+    .event-log { flex: 1; overflow-y: auto; padding: 8px 16px; font-family: monospace; font-size: 12px; }
+    .event-entry { padding: 4px 0; border-bottom: 1px solid #21262d; }
+    .event-time { color: #8b949e; }
+    .event-type { color: #58a6ff; font-weight: 600; }
+    .event-detail { color: #f0883e; }
+    .test-buttons { padding: 12px 16px; border-top: 1px solid #30363d; display: flex; flex-wrap: wrap; gap: 6px; }
+    .test-buttons button { padding: 4px 10px; border: 1px solid #30363d; border-radius: 4px; font-size: 11px; cursor: pointer; background: #21262d; color: #c9d1d9; }
+    .info-bar { padding: 12px 16px; border-bottom: 1px solid #30363d; font-size: 12px; color: #8b949e; line-height: 1.6; }
+    .info-bar code { background: #21262d; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #f0883e; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Custom Paginated — translateX on parent + wide iframe</h1>
+    <div class="toolbar">
+      <div class="status"><div class="status-dot" id="statusDot"></div><span id="statusText">Inactive</span></div>
+      <button class="primary" id="btnActivate">Activate</button>
+      <button class="danger" id="btnDeactivate">Deactivate</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="reader-area">
+      <button class="nav-btn prev" id="btnPrev">&#8592;</button>
+      <div id="epub-reader-frame">
+        <div id="viewport-clipper">
+          <div id="layout-view-root">
+            <iframe id="bookIframe" src="iframe-wide-content.html"></iframe>
+          </div>
+        </div>
+      </div>
+      <button class="nav-btn next" id="btnNext">&#8594;</button>
+      <div class="page-info" id="pageInfo">Loading...</div>
+    </div>
+
+    <div class="sidebar">
+      <div class="info-bar">
+        <strong>Custom pattern.</strong> Iframe is wide (all columns). <code>translateX</code> on <code>layout-view-root</code> shifts pages.
+      </div>
+      <h2>Event Log</h2>
+      <div class="event-log" id="eventLog"></div>
+      <div class="test-buttons">
+        <button id="btnTestCopy">Copy</button>
+        <button id="btnDumpText">Dump innerText</button>
+        <button id="btnClearLog">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ContentProtection } from "../dist/index.js";
+
+    const readerFrame = document.getElementById("epub-reader-frame");
+    const clipper = document.getElementById("viewport-clipper");
+    const layoutRoot = document.getElementById("layout-view-root");
+    const iframe = document.getElementById("bookIframe");
+    const eventLog = document.getElementById("eventLog");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const pageInfo = document.getElementById("pageInfo");
+
+    let protection = null;
+    let currentPage = 0;
+    let totalPages = 1;
+    const pageWidth = 809;
+
+    function logEvent(event) {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement("div");
+      entry.className = "event-entry";
+      entry.innerHTML = `<span class="event-time">${time}</span> <span class="event-type">${event.type}</span>${event.detail ? ` <span class="event-detail">${event.detail}</span>` : ""}`;
+      eventLog.appendChild(entry);
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function goToPage(page) {
+      currentPage = Math.max(0, Math.min(page, totalPages - 1));
+      layoutRoot.style.transform = `translateX(${-(currentPage * pageWidth)}px)`;
+      pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages}`;
+      requestAnimationFrame(() => {
+        protection?.textObfuscation?.recalculate();
+      });
+    }
+
+    document.getElementById("btnPrev").addEventListener("click", () => goToPage(currentPage - 1));
+    document.getElementById("btnNext").addEventListener("click", () => goToPage(currentPage + 1));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") goToPage(currentPage - 1);
+      if (e.key === "ArrowRight") goToPage(currentPage + 1);
+    });
+
+    function buildConfig() {
+      const iframes = [iframe];
+      const targets = { contentElement: readerFrame, contentIframes: iframes };
+      return {
+        onEvent: logEvent,
+        copyProtection: { ...targets, mode: "block", blockCut: true },
+        contextMenuProtection: targets,
+        textObfuscation: {
+          // Visible viewport is the clipper, NOT the iframe
+          scrollContainer: clipper,
+          contentRoot: readerFrame,
+          contentIframes: iframes,
+          viewportPadding: 30,
+        },
+      };
+    }
+
+    async function activateProtection() {
+      if (protection) protection.deactivate();
+      protection = new ContentProtection(buildConfig());
+      await protection.activate();
+      statusDot.classList.add("active");
+      statusText.textContent = "Active";
+      logEvent({ type: "system", timestamp: Date.now(), detail: `Protection active, ${totalPages} pages, iframe ${iframe.offsetWidth}px wide` });
+    }
+
+    function deactivate() {
+      if (protection) { protection.deactivate(); protection = null; }
+      statusDot.classList.remove("active");
+      statusText.textContent = "Inactive";
+    }
+
+    document.getElementById("btnActivate").addEventListener("click", activateProtection);
+    document.getElementById("btnDeactivate").addEventListener("click", deactivate);
+    document.getElementById("btnClearLog").addEventListener("click", () => { eventLog.innerHTML = ""; });
+    document.getElementById("btnTestCopy").addEventListener("click", () => document.execCommand("copy"));
+    document.getElementById("btnDumpText").addEventListener("click", () => {
+      try {
+        const text = iframe.contentDocument.body.innerText;
+        logEvent({ type: "system", timestamp: Date.now(), detail: `iframe innerText: ${text.length} chars` });
+        console.log(text.substring(0, 500) + "...");
+      } catch (e) {
+        logEvent({ type: "system", timestamp: Date.now(), detail: "Dump failed: " + e.message });
+      }
+    });
+
+    // Listen for iframe ready signal
+    window.addEventListener("message", async (e) => {
+      if (!e.data || e.data.type !== "ready") return;
+      const totalWidth = e.data.totalWidth;
+      totalPages = Math.max(1, Math.ceil(totalWidth / pageWidth));
+      const fullWidth = totalPages * pageWidth;
+      iframe.style.width = fullWidth + "px";
+      layoutRoot.style.width = fullWidth + "px";
+      pageInfo.textContent = `Page 1 of ${totalPages}`;
+      currentPage = 0;
+      await activateProtection();
+    });
+  </script>
+</body>
+</html>
