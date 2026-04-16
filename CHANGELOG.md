@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1 (2026-04-16)
+
+- **TextObfuscation: visibility check now works for any reader layout** — uses scrollContainer's screen-space rect for both main-document and iframe nodes. Previously, iframe nodes were checked against `iframe.clientWidth/clientHeight`, which broke for paginated readers where the iframe is super-wide (all columns laid out side-by-side) and a parent uses `translateX` to shift between pages. Now correctly handles scroll, scrollLeft, translateX, translateY, and any other layout transform.
+- Demos: added 4 new layouts (R2D2BC scroll/paginated, Custom scroll/paginated) plus a non-iframe paginated demo, all auto-activating protection on load.
+
 ## 1.1.0 (2026-04-15)
 
 - **TextObfuscation iframe support** — add `contentIframes` config option to scramble text inside iframes with live viewport checks for both scrolling and paginated (CSS columns + translateX) layouts
